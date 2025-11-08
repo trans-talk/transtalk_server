@@ -63,5 +63,10 @@ out/
 .vscode/
 >>>>>>> 79aa214 (feat: Initial commit of Spring Boot project structure)
 
+<<<<<<< HEAD
 ### Github ###
 application.yaml
+=======
+### application properties
+*.env
+>>>>>>> 9a92ed4 (feat : certification & authorization)
