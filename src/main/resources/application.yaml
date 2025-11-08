@@ -1,3 +1,33 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: transtalk
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/transtalk?serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.jdbc.Driver
+
+  oauth:
+      google:
+        client:
+          id: ${GOOGLE_CLIENT_ID}
+          secret: ${GOOGLE_CLIENT_SECRET}
+          redirection: ${GOOGLE_REDIRECTION_URI}
+          uri:
+            token: ${GOOGLE_TOKEN_URI}
+            profile: ${GOOGLE_PROFILE_URI}
+
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
