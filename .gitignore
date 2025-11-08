@@ -61,12 +61,15 @@ out/
 
 ### VS Code ###
 .vscode/
->>>>>>> 79aa214 (feat: Initial commit of Spring Boot project structure)
 
 <<<<<<< HEAD
 ### Github ###
 application.yaml
 =======
 ### application properties
+<<<<<<< HEAD
 *.env
 >>>>>>> 9a92ed4 (feat : certification & authorization)
+=======
+.env
+>>>>>>> 0b1a0dc (chore: remove env from git)
