@@ -2,26 +2,38 @@ package com.wootech.transtalk.entity;
 
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Participant {
-    @EmbeddedId
-    private ParticipantId id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @ManyToOne
-    @MapsId("chatRoomId")
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
     @ManyToOne
-    @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
     @Column
     private int lastReadChatId;
+
+    public Participant(User user,ChatRoom chatRoom) {
+        this.user = user;
+        joinChatRoom(chatRoom);
+    }
+
+    private void joinChatRoom(ChatRoom chatRoom) {
+        this.chatRoom = chatRoom;
+        chatRoom.addParticipant(this);
+    }
 }

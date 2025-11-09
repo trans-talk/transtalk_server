@@ -18,9 +18,18 @@ import lombok.NoArgsConstructor;
 public class ChatRoom extends TimeStamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "chat_room_id")
     private Long id;
     @Column(nullable = false)
     private String language;
     @OneToMany(mappedBy = "chatRoom")
     private List<Participant> participants = new ArrayList<>();
+
+    public ChatRoom(String language) {
+        this.language = language;
+    }
+
+    public void addParticipant(Participant participant) {
+        this.participants.add(participant);
+    }
 }

@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,17 @@ public class Chat {
     private String translatedContent;
     @Column(nullable = false)
     private int unreadCount;
-    @OneToMany
-    private List<Participant> participants = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User sender;
+    @ManyToOne
+    @JoinColumn(name = "chat_room_id")
+    private ChatRoom chatRoom;
+
+    public Chat(String originalContent, User sender,ChatRoom chatRoom) {
+        this.originalContent = originalContent;
+        this.unreadCount = 1;
+        this.sender = sender;
+        this.chatRoom = chatRoom;
+    }
 }
