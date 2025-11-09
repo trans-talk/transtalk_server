@@ -62,14 +62,5 @@ out/
 ### VS Code ###
 .vscode/
 
-<<<<<<< HEAD
-### Github ###
-application.yaml
-=======
 ### application properties
-<<<<<<< HEAD
-*.env
->>>>>>> 9a92ed4 (feat : certification & authorization)
-=======
 .env
->>>>>>> 0b1a0dc (chore: remove env from git)
