@@ -15,7 +15,7 @@ public class ChatController {
     private final ChatService chatService;
 
     @MessageMapping("/chat.{chatRoomId}")
-    @SendTo("/subscribe/chat.{chatRoomId}")
+    @SendTo("/topic/chat.{chatRoomId}")
     public ChatMessageResponse sendMessage(@DestinationVariable Long chatRoomId, ChatMessageRequest request) {
         ChatMessageResponse response = chatService.save(request, chatRoomId);
         return response;
