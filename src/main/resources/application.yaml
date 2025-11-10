@@ -17,6 +17,7 @@ spring:
           secret: ${GOOGLE_CLIENT_SECRET}
           redirection: ${GOOGLE_REDIRECTION_URI}
           uri:
+            authorize: ${GOOGLE_AUTHORIZE_URI}
             token: ${GOOGLE_TOKEN_URI}
             profile: ${GOOGLE_PROFILE_URI}
 

@@ -25,7 +25,7 @@ public class AuthController {
     // 인가 코드 받기
     @GetMapping
     public ApiResponse<URI> createAuthorizationUrl() {
-        return ApiResponse.success(authService.createRequest());
+        return ApiResponse.success(authService.createRequest(), "인증 코드 url 요청에 성공했습니다.");
     }
 
     // 회원가입 및 로그인
@@ -35,8 +35,8 @@ public class AuthController {
             HttpServletResponse httpServletResponse
     ) {
         AuthSignInResponse authSignInResponse = authService.googleLogin(code);
-        addRefreshTokenCookie(httpServletResponse, authSignInResponse.getResponse().getRefreshToken());
-        return ApiResponse.success(authSignInResponse);
+        addRefreshTokenCookie(httpServletResponse, authSignInResponse.getTokenresponse().getRefreshToken());
+        return ApiResponse.success(authSignInResponse, "인증 요청에 성공했습니다.");
     }
 
     // 토큰 재발급
@@ -48,6 +48,6 @@ public class AuthController {
     ) {
         AuthSignInResponse.TokenResponse tokenResponse = authService.refreshAccessToken(userId, refreshToken);
         addRefreshTokenCookie(httpServletResponse, tokenResponse.getRefreshToken());
-        return ApiResponse.success(tokenResponse);
+        return ApiResponse.success(tokenResponse, "토큰 재발급에 성공했습니다.");
     }
 }

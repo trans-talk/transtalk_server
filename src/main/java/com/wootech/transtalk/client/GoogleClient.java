@@ -17,6 +17,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
+import static com.wootech.transtalk.exception.ErrorMessages.ACCESS_TOKEN_DOES_NOT_EXISTS_ERROR;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -34,11 +36,13 @@ public class GoogleClient {
     private String tokenUri;
     @Value("${spring.oauth.google.client.redirection}")
     private String redirectUri;
+    @Value("${GOOGLE_AUTHORIZE_URI}")
+    private String authorizeUri;
 
     public static final String BEARER_PREFIX = "Bearer ";
 
     public URI buildAuthorizeApiUri() {
-        return UriComponentsBuilder.fromUriString("https://accounts.google.com/o/oauth2/v2/auth")
+        return UriComponentsBuilder.fromUriString(authorizeUri)
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("response_type", "code")
@@ -77,6 +81,7 @@ public class GoogleClient {
                  }))
                  .body(GoogleApiResponse.class);
 
+         // TODO: external api logging
          log.info("[GoogleAPI] Token Response: {}", tokenResponse);
 
          String accessToken = extractAccessCode(tokenResponse);
@@ -86,7 +91,7 @@ public class GoogleClient {
     private String extractAccessCode(GoogleApiResponse response) {
         if (response == null || response.getAccessToken() == null || response.getAccessToken().isEmpty()) {
             log.warn("[GoogleAPI] Empty Response From Google");
-            return "";
+            throw new GoogleApiException(ACCESS_TOKEN_DOES_NOT_EXISTS_ERROR);
         }
         return response.getAccessToken();
     }

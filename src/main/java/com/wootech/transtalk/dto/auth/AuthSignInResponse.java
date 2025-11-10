@@ -10,11 +10,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class AuthSignInResponse {
-    private Long id;
-    private String email;
-    private String name;
-    private String picture;
-    private TokenResponse response;
+    private UserResponse userResponse;
+    private TokenResponse tokenresponse;
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class UserResponse {
+        private Long id;
+        private String email;
+        private String name;
+        private String picture;
+    }
 
     @Getter
     @NoArgsConstructor
