@@ -32,4 +32,16 @@ public class ChatRoom extends TimeStamped {
     public void addParticipant(Participant participant) {
         this.participants.add(participant);
     }
+
+    public User getRecipient(Long currentUserId) {
+        return participants.stream().filter(participant -> !participant.getUser().getId().equals(currentUserId))
+                .map(Participant::getUser)
+                .findFirst().orElseThrow(() -> new IllegalArgumentException(""));
+    }
+
+    public Long getLastReadChatId(Long currentUserId) {
+        return participants.stream().filter(participant -> participant.getUser().getId().equals(currentUserId))
+                .map(Participant::getLastReadChatId).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(""));
+    }
 }

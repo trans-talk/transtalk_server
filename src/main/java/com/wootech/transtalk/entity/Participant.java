@@ -25,7 +25,7 @@ public class Participant {
     @JoinColumn(name = "user_id")
     private User user;
     @Column
-    private int lastReadChatId;
+    private Long lastReadChatId;
 
     public Participant(User user,ChatRoom chatRoom) {
         this.user = user;

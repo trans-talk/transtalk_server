@@ -1,11 +1,16 @@
 package com.wootech.transtalk.service.chatroom;
 
+import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
+import com.wootech.transtalk.entity.Chat;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.Participant;
 import com.wootech.transtalk.entity.User;
+import com.wootech.transtalk.repository.ChatRepository;
 import com.wootech.transtalk.repository.ChatRoomRepository;
 import com.wootech.transtalk.repository.UserRepository;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ChatRepository chatRepository;
 
     @Transactional
     public void save(String language, String senderEmail, String recipientEmail) {
@@ -28,6 +34,25 @@ public class ChatRoomService {
 
         chatRoomRepository.save(chatRoom);
     }
+
+    @Transactional
+    public List<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId) {
+        userRepository.findById(currentUserId).orElseThrow(() -> new RuntimeException(""));
+        List<ChatRoom> chatRooms = chatRoomRepository.findByParticipants_userId(currentUserId);
+
+        return chatRooms.stream().map(chatRoom -> {
+                    User recipient = chatRoom.getRecipient(currentUserId);
+
+                    Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId());
+                    long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
+
+                    return new ChatRoomResponse(chatRoom.getId(), recipient.getPicture(),
+                            recipient.getName(), chatRoom.getLanguage(), lastChat.getOriginalContent(),
+                            lastChat.getTranslatedContent(),
+                            lastChat.getCreatedAt(), (int) (lastChat.getId() - lastReadChatId));
+                }).collect(Collectors.toList());
+    }
+
     public ChatRoom findById(Long chatRoomId) {
         return chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new RuntimeException(""));
     }
