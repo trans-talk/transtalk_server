@@ -1,4 +1,4 @@
 package com.wootech.transtalk.dto;
 
-public class ChatMessageResponse {
+public record ChatMessageResponse(String originalMessage,String translatedMessage,String senderEmail) {
 }
