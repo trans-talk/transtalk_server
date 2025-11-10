@@ -16,7 +16,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Participant {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "chat_room_id")
@@ -27,13 +28,18 @@ public class Participant {
     @Column
     private Long lastReadChatId;
 
-    public Participant(User user,ChatRoom chatRoom) {
+    public Participant(User user, ChatRoom chatRoom) {
         this.user = user;
         joinChatRoom(chatRoom);
+        setLastReadChatId();
     }
 
     private void joinChatRoom(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;
         chatRoom.addParticipant(this);
+    }
+
+    private void setLastReadChatId() {
+        this.lastReadChatId = 0L;
     }
 }

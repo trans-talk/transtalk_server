@@ -23,7 +23,7 @@ public class ChatRoomService {
     private final ChatRepository chatRepository;
 
     @Transactional
-    public void save(String language, String senderEmail, String recipientEmail) {
+    public Long save(String language, String senderEmail, String recipientEmail) {
         ChatRoom chatRoom = new ChatRoom(language);
 
         User sender = userRepository.findByEmail(senderEmail).orElseThrow(() -> new RuntimeException(""));
@@ -32,13 +32,13 @@ public class ChatRoomService {
         new Participant(sender, chatRoom);
         new Participant(recipient, chatRoom);
 
-        chatRoomRepository.save(chatRoom);
+        return chatRoomRepository.save(chatRoom).getId();
     }
 
     @Transactional
     public List<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId) {
         userRepository.findById(currentUserId).orElseThrow(() -> new RuntimeException(""));
-        List<ChatRoom> chatRooms = chatRoomRepository.findByParticipants_userId(currentUserId);
+        List<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId);
 
         return chatRooms.stream().map(chatRoom -> {
                     User recipient = chatRoom.getRecipient(currentUserId);
