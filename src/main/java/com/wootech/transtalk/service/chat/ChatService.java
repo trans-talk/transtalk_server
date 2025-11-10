@@ -18,12 +18,16 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
     private final ChatRoomService chatRoomService;
+
     @Transactional
-    public ChatMessageResponse save(ChatMessageRequest request, Long chatRoomId) {
-        User sender = userRepository.findByEmail(request.userEmail()).orElseThrow(() -> new RuntimeException(""));
+    public ChatMessageResponse save(ChatMessageRequest request, Long chatRoomId, String senderEmail) {
+        //TODO Must be changed to use authservice.
+        User sender = userRepository.findByEmail(senderEmail).orElseThrow(() -> new RuntimeException(""));
         ChatRoom findChatRoom = chatRoomService.findById(chatRoomId);
+
         Chat chat = new Chat(request.content(), sender, findChatRoom);
         chatRepository.save(chat);
+
         return new ChatMessageResponse(chat.getOriginalContent(), chat.getTranslatedContent(), sender.getEmail());
     }
 }
