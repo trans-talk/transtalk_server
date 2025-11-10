@@ -1,4 +1,4 @@
-package com.wootech.transtalk.service.chat;
+package com.wootech.transtalk.service.chatroom;
 
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.Participant;

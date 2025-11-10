@@ -1,4 +1,4 @@
-package com.wootech.transtalk.controller;
+package com.wootech.transtalk.controller.chat;
 
 import com.wootech.transtalk.dto.ChatMessageRequest;
 import com.wootech.transtalk.dto.ChatMessageResponse;
