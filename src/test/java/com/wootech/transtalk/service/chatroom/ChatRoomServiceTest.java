@@ -7,6 +7,7 @@ import com.wootech.transtalk.dto.ChatMessageRequest;
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
 import com.wootech.transtalk.entity.User;
+import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.enums.UserRole;
 import com.wootech.transtalk.service.chat.ChatService;
 import com.wootech.transtalk.service.user.UserService;
@@ -35,7 +36,7 @@ class ChatRoomServiceTest {
                 "tae@google", "tae", UserRole.ROLE_USER, "img1");
         User recipient = userService.findByEmailOrGet(
                 "other@google", "other", UserRole.ROLE_USER, "img2");
-        CreateChatRoomResponse response = chatRoomService.save("ko", "tae@google", "other@google");
+        CreateChatRoomResponse response = chatRoomService.save(TranslateLanguage.KOREAN, "tae@google", "other@google");
         chatService.save(new ChatMessageRequest("hello"), response.chatRoomId(), "tae@google");
         Pageable pageable = PageRequest.of(0, 40);
         Page<ChatRoomResponse> responses = chatRoomService.findChatRoomsByUserId(user.getId(),pageable);
@@ -56,7 +57,7 @@ class ChatRoomServiceTest {
                                 response.chatRoomId(),
                                 recipient.getName(),
                                 recipient.getPicture(),
-                                "ko",
+                                TranslateLanguage.KOREAN.getCode(),
                                 (String) null
                         )
                 );

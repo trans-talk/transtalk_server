@@ -8,6 +8,7 @@ import com.wootech.transtalk.entity.Chat;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.Participant;
 import com.wootech.transtalk.entity.User;
+import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.exception.custom.NotFoundException;
 import com.wootech.transtalk.repository.ChatRepository;
 import com.wootech.transtalk.repository.ChatRoomRepository;
@@ -28,7 +29,8 @@ public class ChatRoomService {
     private final ChatRepository chatRepository;
 
     @Transactional
-    public CreateChatRoomResponse save(String language, String senderEmail, String recipientEmail) {
+    public CreateChatRoomResponse save(TranslateLanguage language, String senderEmail, String recipientEmail) {
+        //TODO 동일한 채팅방이 있다면 생성하지 않는 로직 추가
         ChatRoom chatRoom = new ChatRoom(language);
 
         User sender = userService.getUserByEmail(senderEmail);
@@ -52,7 +54,7 @@ public class ChatRoomService {
             long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
 
             return new ChatRoomResponse(chatRoom.getId(), recipient.getPicture(),
-                    recipient.getName(), chatRoom.getLanguage(), lastChat.getOriginalContent(),
+                    recipient.getName(), chatRoom.getLanguage().getCode(), lastChat.getOriginalContent(),
                     lastChat.getTranslatedContent(),
                     lastChat.getCreatedAt(), (int) (lastChat.getId() - lastReadChatId));
         });

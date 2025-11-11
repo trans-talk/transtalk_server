@@ -1,4 +1,6 @@
 package com.wootech.transtalk.dto.chatroom;
 
-public record CreateChatRoomRequest(String language, String recipientEmail) {
+import com.wootech.transtalk.enums.TranslateLanguage;
+
+public record CreateChatRoomRequest(TranslateLanguage language, String recipientEmail) {
 }
