@@ -1,5 +1,6 @@
 package com.wootech.transtalk.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +23,7 @@ public class ChatRoom extends TimeStamped {
     private Long id;
     @Column(nullable = false)
     private String language;
-    @OneToMany(mappedBy = "chatRoom")
+    @OneToMany(mappedBy = "chatRoom",cascade = CascadeType.PERSIST)
     private List<Participant> participants = new ArrayList<>();
 
     public ChatRoom(String language) {
@@ -31,5 +32,17 @@ public class ChatRoom extends TimeStamped {
 
     public void addParticipant(Participant participant) {
         this.participants.add(participant);
+    }
+
+    public User getRecipient(Long currentUserId) {
+        return participants.stream().filter(participant -> !participant.getUser().getId().equals(currentUserId))
+                .map(Participant::getUser)
+                .findFirst().orElseThrow(() -> new IllegalArgumentException(""));
+    }
+
+    public Long getLastReadChatId(Long currentUserId) {
+        return participants.stream().filter(participant -> participant.getUser().getId().equals(currentUserId))
+                .map(Participant::getLastReadChatId).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(""));
     }
 }
