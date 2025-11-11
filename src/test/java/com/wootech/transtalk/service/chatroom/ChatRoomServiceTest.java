@@ -1,6 +1,8 @@
 package com.wootech.transtalk.service.chatroom;
 
 
+import static org.assertj.core.groups.Tuple.tuple;
+
 import com.wootech.transtalk.dto.ChatMessageRequest;
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import com.wootech.transtalk.entity.User;
@@ -13,6 +15,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @SpringBootTest
 @DisplayName("Integration - ChatRoomService")
@@ -33,9 +38,10 @@ class ChatRoomServiceTest {
                         .build());
         Long savedChatRoomId = chatRoomService.save("ko", "tae@google", "other@google");
         chatService.save(new ChatMessageRequest("hello"), savedChatRoomId, "tae@google");
-        List<ChatRoomResponse> responses = chatRoomService.findChatRoomsByUserId(user.getId());
+        Pageable pageable = PageRequest.of(0, 40);
+        Page<ChatRoomResponse> responses = chatRoomService.findChatRoomsByUserId(user.getId(),pageable);
 
-        Assertions.assertThat(responses.get(0))
+        Assertions.assertThat(responses.getContent())
                 .extracting(
                         ChatRoomResponse::originalRecentMessage,
                         ChatRoomResponse::unreadMessageCount,
@@ -44,14 +50,16 @@ class ChatRoomServiceTest {
                         ChatRoomResponse::recipientPicture,
                         ChatRoomResponse::selectedLanguage,
                         ChatRoomResponse::translatedRecentMessage
-                ).contains(
-                        "hello",
-                        1,
-                        savedChatRoomId,
-                        recipient.getName(),
-                        recipient.getPicture(),
-                        "ko",
-                        null
+                ).containsExactlyInAnyOrder(
+                        tuple(
+                                "hello",
+                                1,
+                                savedChatRoomId,
+                                recipient.getName(),
+                                recipient.getPicture(),
+                                "ko",
+                                (String) null
+                        )
                 );
     }
 }

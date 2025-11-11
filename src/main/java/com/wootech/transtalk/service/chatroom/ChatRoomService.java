@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,21 +38,21 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public List<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId) {
+    public Page<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId, Pageable pageable) {
         userRepository.findById(currentUserId).orElseThrow(() -> new RuntimeException(""));
-        List<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId);
+        Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, pageable);
 
-        return chatRooms.stream().map(chatRoom -> {
-                    User recipient = chatRoom.getRecipient(currentUserId);
+        return chatRooms.map(chatRoom -> {
+            User recipient = chatRoom.getRecipient(currentUserId);
 
-                    Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId());
-                    long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
+            Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId());
+            long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
 
-                    return new ChatRoomResponse(chatRoom.getId(), recipient.getPicture(),
-                            recipient.getName(), chatRoom.getLanguage(), lastChat.getOriginalContent(),
-                            lastChat.getTranslatedContent(),
-                            lastChat.getCreatedAt(), (int) (lastChat.getId() - lastReadChatId));
-                }).collect(Collectors.toList());
+            return new ChatRoomResponse(chatRoom.getId(), recipient.getPicture(),
+                    recipient.getName(), chatRoom.getLanguage(), lastChat.getOriginalContent(),
+                    lastChat.getTranslatedContent(),
+                    lastChat.getCreatedAt(), (int) (lastChat.getId() - lastReadChatId));
+        });
     }
 
     public ChatRoom findById(Long chatRoomId) {
