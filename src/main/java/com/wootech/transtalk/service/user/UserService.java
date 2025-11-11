@@ -52,4 +52,11 @@ public class UserService {
                     return new NotFoundException(USER_NOT_FOUND_ERROR);
                 });
     }
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("[AuthService] Received User email={}", email);
+                    return new NotFoundException(USER_NOT_FOUND_ERROR);
+                });
+    }
 }

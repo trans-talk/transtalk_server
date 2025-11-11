@@ -8,6 +8,7 @@ import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.repository.ChatRepository;
 import com.wootech.transtalk.repository.ChatRoomRepository;
 import com.wootech.transtalk.repository.UserRepository;
+import com.wootech.transtalk.service.user.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,15 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ChatRepository chatRepository;
 
     @Transactional
     public Long save(String language, String senderEmail, String recipientEmail) {
         ChatRoom chatRoom = new ChatRoom(language);
 
-        User sender = userRepository.findByEmail(senderEmail).orElseThrow(() -> new RuntimeException(""));
-        User recipient = userRepository.findByEmail(recipientEmail).orElseThrow(() -> new RuntimeException(""));
+        User sender = userService.getUserByEmail(senderEmail);
+        User recipient = userService.getUserByEmail(recipientEmail);
 
         new Participant(sender, chatRoom);
         new Participant(recipient, chatRoom);
@@ -39,7 +40,7 @@ public class ChatRoomService {
 
     @Transactional
     public Page<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId, Pageable pageable) {
-        userRepository.findById(currentUserId).orElseThrow(() -> new RuntimeException(""));
+        User currentUser = userService.getUserById(currentUserId);
         Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, pageable);
 
         return chatRooms.map(chatRoom -> {
