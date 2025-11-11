@@ -23,4 +23,8 @@ public final class ErrorMessages {
 
     // user
     public static final String USER_NOT_FOUND_ERROR = "사용자 정보 조회에 실패했습니다.";
+
+    // ChatRoom
+    public static final String CHAT_ROOM_NOT_FOUND_ERROR = "채팅방 조회에 실패했습니다.";
+    public static final String PARTICIPANT_NOT_FOUND_ERROR = "채팅방 참여자 정보 조회에 실패했습니다.";
 }

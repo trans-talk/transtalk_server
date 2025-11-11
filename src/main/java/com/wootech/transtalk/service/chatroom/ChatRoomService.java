@@ -1,23 +1,24 @@
 package com.wootech.transtalk.service.chatroom;
 
+import static com.wootech.transtalk.exception.ErrorMessages.*;
+
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import com.wootech.transtalk.entity.Chat;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.Participant;
 import com.wootech.transtalk.entity.User;
+import com.wootech.transtalk.exception.custom.NotFoundException;
 import com.wootech.transtalk.repository.ChatRepository;
 import com.wootech.transtalk.repository.ChatRoomRepository;
-import com.wootech.transtalk.repository.UserRepository;
 import com.wootech.transtalk.service.user.UserService;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatRoomService {
@@ -57,6 +58,10 @@ public class ChatRoomService {
     }
 
     public ChatRoom findById(Long chatRoomId) {
-        return chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new RuntimeException(""));
+        return chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> {
+                    log.error("[ChatRoomService] Received ChatRoom Id={}", chatRoomId);
+                    return new NotFoundException(CHAT_ROOM_NOT_FOUND_ERROR);
+                });
     }
 }

@@ -55,7 +55,7 @@ public class UserService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> {
-                    log.error("[AuthService] Received User email={}", email);
+                    log.error("[AuthService] Received User Email={}", email);
                     return new NotFoundException(USER_NOT_FOUND_ERROR);
                 });
     }
