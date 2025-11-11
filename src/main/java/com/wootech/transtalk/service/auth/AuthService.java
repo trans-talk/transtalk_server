@@ -1,18 +1,20 @@
 package com.wootech.transtalk.service.auth;
 
-import com.wootech.transtalk.enums.UserRole;
 import com.wootech.transtalk.client.GoogleClient;
 import com.wootech.transtalk.config.util.JwtUtil;
 import com.wootech.transtalk.dto.auth.AuthSignInResponse;
 import com.wootech.transtalk.dto.auth.GoogleProfileResponse;
 import com.wootech.transtalk.entity.User;
-import com.wootech.transtalk.exception.custom.NotFoundException;
-import com.wootech.transtalk.repository.UserRepository;
+import com.wootech.transtalk.enums.UserRole;
+import com.wootech.transtalk.exception.custom.UnauthorizedException;
+import com.wootech.transtalk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+
+import static com.wootech.transtalk.exception.ErrorMessages.INVALID_REFRESH_TOKEN_ERROR;
 
 @Slf4j
 @Service
@@ -21,8 +23,8 @@ public class AuthService {
 
     private final JwtUtil jwtUtil;
     private final GoogleClient googleClient;
-    private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
+    private final UserService userService;
 
     public URI createRequest() {
         return googleClient.buildAuthorizeApiUri();
@@ -36,7 +38,7 @@ public class AuthService {
         GoogleProfileResponse googleProfileResponse = googleClient.requestProfile(authorizationToken);
 
         // 사용자 정보 프로젝트에 저장 또는 있을 경우 반환
-        User user = findByEmailOrGet(
+        User user = userService.findByEmailOrGet(
                 googleProfileResponse.getEmail(),
                 googleProfileResponse.getName(),
                 UserRole.ROLE_USER,
@@ -50,28 +52,17 @@ public class AuthService {
         refreshTokenService.saveRefreshToken(refreshToken);
 
         return AuthSignInResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .picture(user.getPicture())
-                .response(AuthSignInResponse.TokenResponse.builder()
+                .userResponse(AuthSignInResponse.UserResponse.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .name(user.getName())
+                        .picture(user.getPicture())
+                        .build())
+                .tokenresponse(AuthSignInResponse.TokenResponse.builder()
                         .accessToken(accessToken)
                         .refreshToken(refreshToken)
                         .build())
                 .build();
-    }
-
-    // 회원가입
-    private User findByEmailOrGet(String email, String name, UserRole userRole, String picture) {
-        return userRepository.findByEmail(email)
-                .orElseGet(() -> userRepository.save(
-                        User.builder()
-                                .email(email)
-                                .name(name)
-                                .userRole(userRole)
-                                .picture(picture)
-                                .build()
-                ));
     }
 
 
@@ -80,14 +71,10 @@ public class AuthService {
         String storedToken = refreshTokenService.getRefreshToken(refreshToken);
 
         if (storedToken == null || !storedToken.equals(refreshToken)) {
-            throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN_ERROR);
         }
 
-        User foundUser = userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    log.error("[UserService] User Not Found: Received ID={}", userId);
-                    return new NotFoundException("User Not Found");
-                });
+        User foundUser = userService.getUserById(userId);
 
         String accessToken = jwtUtil.createAccessToken(foundUser.getId(), foundUser.getEmail(), foundUser.getName(), foundUser.getUserRole());
 
