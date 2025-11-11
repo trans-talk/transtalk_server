@@ -30,16 +30,16 @@ public class ChatRoomService {
 
     @Transactional
     public CreateChatRoomResponse save(TranslateLanguage language, String senderEmail, String recipientEmail) {
-        //TODO 동일한 채팅방이 있다면 생성하지 않는 로직 추가
-        ChatRoom chatRoom = new ChatRoom(language);
-
         User sender = userService.getUserByEmail(senderEmail);
         User recipient = userService.getUserByEmail(recipientEmail);
-
-        new Participant(sender, chatRoom);
-        new Participant(recipient, chatRoom);
-
-        return new CreateChatRoomResponse(chatRoomRepository.save(chatRoom).getId());
+        ChatRoom chatRoom = chatRoomRepository.findChatRoomBetweenUsers(sender.getId(), recipient.getId(), language)
+                .orElseGet(() -> {
+                    ChatRoom newChatRoom = new ChatRoom(language);
+                    new Participant(sender, newChatRoom);
+                    new Participant(recipient, newChatRoom);
+                    return chatRoomRepository.save(newChatRoom);
+                });
+        return new CreateChatRoomResponse(chatRoom.getId());
     }
 
     @Transactional
