@@ -3,6 +3,7 @@ package com.wootech.transtalk.service.chatroom;
 import static com.wootech.transtalk.exception.ErrorMessages.*;
 
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
+import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
 import com.wootech.transtalk.entity.Chat;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.Participant;
@@ -27,7 +28,7 @@ public class ChatRoomService {
     private final ChatRepository chatRepository;
 
     @Transactional
-    public Long save(String language, String senderEmail, String recipientEmail) {
+    public CreateChatRoomResponse save(String language, String senderEmail, String recipientEmail) {
         ChatRoom chatRoom = new ChatRoom(language);
 
         User sender = userService.getUserByEmail(senderEmail);
@@ -36,7 +37,7 @@ public class ChatRoomService {
         new Participant(sender, chatRoom);
         new Participant(recipient, chatRoom);
 
-        return chatRoomRepository.save(chatRoom).getId();
+        return new CreateChatRoomResponse(chatRoomRepository.save(chatRoom).getId());
     }
 
     @Transactional

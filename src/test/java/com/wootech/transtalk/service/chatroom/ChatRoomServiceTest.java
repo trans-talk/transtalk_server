@@ -5,12 +5,11 @@ import static org.assertj.core.groups.Tuple.tuple;
 
 import com.wootech.transtalk.dto.ChatMessageRequest;
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
+import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.UserRole;
-import com.wootech.transtalk.repository.UserRepository;
 import com.wootech.transtalk.service.chat.ChatService;
 import com.wootech.transtalk.service.user.UserService;
-import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,8 +35,8 @@ class ChatRoomServiceTest {
                 "tae@google", "tae", UserRole.ROLE_USER, "img1");
         User recipient = userService.findByEmailOrGet(
                 "other@google", "other", UserRole.ROLE_USER, "img2");
-        Long savedChatRoomId = chatRoomService.save("ko", "tae@google", "other@google");
-        chatService.save(new ChatMessageRequest("hello"), savedChatRoomId, "tae@google");
+        CreateChatRoomResponse response = chatRoomService.save("ko", "tae@google", "other@google");
+        chatService.save(new ChatMessageRequest("hello"), response.chatRoomId(), "tae@google");
         Pageable pageable = PageRequest.of(0, 40);
         Page<ChatRoomResponse> responses = chatRoomService.findChatRoomsByUserId(user.getId(),pageable);
 
@@ -54,7 +53,7 @@ class ChatRoomServiceTest {
                         tuple(
                                 "hello",
                                 1,
-                                savedChatRoomId,
+                                response.chatRoomId(),
                                 recipient.getName(),
                                 recipient.getPicture(),
                                 "ko",
