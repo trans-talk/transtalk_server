@@ -9,6 +9,7 @@ import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.UserRole;
 import com.wootech.transtalk.repository.UserRepository;
 import com.wootech.transtalk.service.chat.ChatService;
+import com.wootech.transtalk.service.user.UserService;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +24,7 @@ import org.springframework.data.domain.Pageable;
 @DisplayName("Integration - ChatRoomService")
 class ChatRoomServiceTest {
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
     @Autowired
     private ChatRoomService chatRoomService;
     @Autowired
@@ -31,11 +32,10 @@ class ChatRoomServiceTest {
 
     @Test
     void findChatRoomsByUserId() {
-        User user = userRepository.save(
-                User.builder().email("tae@google").name("tae").picture("img1").userRole(UserRole.ROLE_USER).build());
-        User recipient = userRepository.save(
-                User.builder().email("other@google").name("other").picture("img2").userRole(UserRole.ROLE_USER)
-                        .build());
+        User user = userService.findByEmailOrGet(
+                "tae@google", "tae", UserRole.ROLE_USER, "img1");
+        User recipient = userService.findByEmailOrGet(
+                "other@google", "other", UserRole.ROLE_USER, "img2");
         Long savedChatRoomId = chatRoomService.save("ko", "tae@google", "other@google");
         chatService.save(new ChatMessageRequest("hello"), savedChatRoomId, "tae@google");
         Pageable pageable = PageRequest.of(0, 40);
