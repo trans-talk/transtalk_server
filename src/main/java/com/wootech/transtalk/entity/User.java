@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "users")
 public class User extends TimeStamped {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
