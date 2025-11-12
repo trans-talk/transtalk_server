@@ -25,6 +25,10 @@ spring:
     redis:
       password: ${REDIS_PASSWORD}
 
+    mongodb:
+      uri: ${MONGO_URI}
+      database: ${MONGO_DATABASE}
+
   jpa:
     hibernate:
       ddl-auto: create

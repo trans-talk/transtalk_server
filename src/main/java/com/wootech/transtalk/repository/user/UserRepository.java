@@ -1,4 +1,4 @@
-package com.wootech.transtalk.repository;
+package com.wootech.transtalk.repository.user;
 
 import com.wootech.transtalk.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

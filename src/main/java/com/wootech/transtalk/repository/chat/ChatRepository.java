@@ -1,4 +1,4 @@
-package com.wootech.transtalk.repository;
+package com.wootech.transtalk.repository.chat;
 
 import com.wootech.transtalk.entity.Chat;
 import org.springframework.data.jpa.repository.JpaRepository;

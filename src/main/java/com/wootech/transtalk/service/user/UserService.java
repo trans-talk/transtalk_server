@@ -5,7 +5,7 @@ import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.UserRole;
 import com.wootech.transtalk.exception.custom.NotFoundException;
-import com.wootech.transtalk.repository.UserRepository;
+import com.wootech.transtalk.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
