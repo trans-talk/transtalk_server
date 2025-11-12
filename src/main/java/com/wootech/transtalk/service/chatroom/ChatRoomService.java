@@ -50,13 +50,18 @@ public class ChatRoomService {
         return chatRooms.map(chatRoom -> {
             User recipient = chatRoom.getRecipient(currentUserId);
 
-            Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId());
+            Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
             long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
 
-            return new ChatRoomResponse(chatRoom.getId(), recipient.getPicture(),
-                    recipient.getName(), chatRoom.getLanguage().getCode(), lastChat.getOriginalContent(),
-                    lastChat.getTranslatedContent(),
-                    lastChat.getCreatedAt(), (int) (lastChat.getId() - lastReadChatId));
+            return new ChatRoomResponse(
+                    chatRoom.getId(),
+                    recipient.getPicture(),
+                    recipient.getName(),
+                    chatRoom.getLanguage().getCode(),
+                    lastChat != null ? lastChat.getOriginalContent() : "",
+                    lastChat != null ? lastChat.getTranslatedContent() : "",
+                    lastChat != null ? lastChat.getCreatedAt() : null,
+                    lastChat != null ? (int) (lastChat.getId() - lastReadChatId) : 0);
         });
     }
 

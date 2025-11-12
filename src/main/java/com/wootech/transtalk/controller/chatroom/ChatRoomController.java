@@ -30,7 +30,7 @@ public class ChatRoomController {
                                                            @PageableDefault(size = 40) Pageable pageable) {
         Page<ChatRoomResponse> pages = chatRoomService.findChatRoomsByUserId(authUser.getUserId(),
                 pageable);
-        ChatRoomListResponse response = new ChatRoomListResponse(pages.getContent(), pages.getNumberOfElements());
+        ChatRoomListResponse response = ChatRoomListResponse.from(pages);
         return ApiResponse.success(response);
     }
 
