@@ -4,6 +4,8 @@ import com.wootech.transtalk.dto.ApiResponse;
 import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.dto.chatroom.ChatRoomListResponse;
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
+import com.wootech.transtalk.dto.chatroom.CreateChatRoomRequest;
+import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,15 +27,15 @@ public class ChatRoomController {
                                                            @PageableDefault(size = 40) Pageable pageable) {
         Page<ChatRoomResponse> pages = chatRoomService.findChatRoomsByUserId(authUser.getUserId(),
                 pageable);
-        ChatRoomListResponse response = new ChatRoomListResponse(pages.getContent(), pages.getNumberOfElements());
+        ChatRoomListResponse response = ChatRoomListResponse.from(pages);
         return ApiResponse.success(response);
     }
 
     @PostMapping
-    public ApiResponse<Long> saveChatRoom(@AuthenticationPrincipal AuthUser authUser,
-                                                      @RequestParam String language,
-                                                      @RequestParam String recipientEmail
-    ) {
-        return ApiResponse.success(chatRoomService.save(language, authUser.getEmail(), recipientEmail));
+    public ApiResponse<CreateChatRoomResponse> createChatRoom(@AuthenticationPrincipal AuthUser authUser,
+                                                              @RequestBody CreateChatRoomRequest request) {
+        CreateChatRoomResponse response = chatRoomService.save(request.language(), authUser.getEmail(),
+                request.recipientEmail());
+        return ApiResponse.success(response);
     }
 }

@@ -2,11 +2,14 @@ package com.wootech.transtalk.entity;
 
 import static com.wootech.transtalk.exception.ErrorMessages.*;
 
+import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.exception.ErrorMessages;
 import com.wootech.transtalk.exception.custom.NotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,11 +29,12 @@ public class ChatRoom extends TimeStamped {
     @Column(name = "chat_room_id")
     private Long id;
     @Column(nullable = false)
-    private String language;
+    @Enumerated(value = EnumType.STRING)
+    private TranslateLanguage language;
     @OneToMany(mappedBy = "chatRoom",cascade = CascadeType.PERSIST)
     private List<Participant> participants = new ArrayList<>();
 
-    public ChatRoom(String language) {
+    public ChatRoom(TranslateLanguage language) {
         this.language = language;
     }
 

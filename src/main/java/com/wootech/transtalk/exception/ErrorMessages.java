@@ -29,4 +29,7 @@ public final class ErrorMessages {
     // ChatRoom
     public static final String CHAT_ROOM_NOT_FOUND_ERROR = "채팅방 조회에 실패했습니다.";
     public static final String PARTICIPANT_NOT_FOUND_ERROR = "채팅방 참여자 정보 조회에 실패했습니다.";
+
+    // TranslateLanguage
+    public static final String NOT_SUPPORTED_LANGUAGE_CODE_ERROR = "지원하지 않는 언어 코드입니다.";
 }
