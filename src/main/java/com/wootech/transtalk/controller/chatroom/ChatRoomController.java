@@ -6,6 +6,7 @@ import com.wootech.transtalk.dto.chatroom.ChatRoomListResponse;
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import com.wootech.transtalk.dto.chatroom.CreateChatRoomRequest;
 import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
+import jakarta.validation.Valid;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,7 +23,7 @@ public class ChatRoomController {
 
     @GetMapping
     public ApiResponse<ChatRoomListResponse> findChatRooms(@AuthenticationPrincipal AuthUser authUser,
-                                                           @PageableDefault(size = 40) Pageable pageable) {
+                                                           @PageableDefault(size = 20) Pageable pageable) {
         Page<ChatRoomResponse> pages = chatRoomService.findChatRoomsByUserId(authUser.getUserId(),
                 pageable);
         ChatRoomListResponse response = ChatRoomListResponse.from(pages);
@@ -31,7 +32,7 @@ public class ChatRoomController {
 
     @PostMapping
     public ApiResponse<CreateChatRoomResponse> createChatRoom(@AuthenticationPrincipal AuthUser authUser,
-                                                              @RequestBody CreateChatRoomRequest request) {
+                                                              @Valid @RequestBody CreateChatRoomRequest request) {
         CreateChatRoomResponse response = chatRoomService.save(request.language(), authUser.getEmail(),
                 request.recipientEmail());
         return ApiResponse.success(response);

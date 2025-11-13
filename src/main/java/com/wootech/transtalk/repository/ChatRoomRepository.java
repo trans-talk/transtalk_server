@@ -10,7 +10,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom,Long> {
-    Page<ChatRoom> findByParticipantsUserId(Long userId, Pageable pageable);
+    @Query("""
+            SELECT cr FROM ChatRoom cr
+            JOIN cr.participants p
+            WHERE p.user.id = :userId
+            ORDER BY(
+            SELECT MAX(c.createdAt)
+            FROM Chat c
+            WHERE c.chatRoom.id = cr.id
+            ) DESC 
+            """)
+    Page<ChatRoom> findByParticipantsUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query("""
             SELECT cr 
