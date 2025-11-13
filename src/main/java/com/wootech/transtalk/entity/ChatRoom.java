@@ -19,6 +19,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatusCode;
 
 @Getter
 @Entity
@@ -45,12 +46,12 @@ public class ChatRoom extends TimeStamped {
     public User getRecipient(Long currentUserId) {
         return participants.stream().filter(participant -> !participant.getUser().getId().equals(currentUserId))
                 .map(Participant::getUser).findFirst()
-                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR));
+                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
     }
 
     public Long getLastReadChatId(Long currentUserId) {
         return participants.stream().filter(participant -> participant.getUser().getId().equals(currentUserId))
                 .map(Participant::getLastReadChatId).findFirst()
-                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR));
+                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
     }
 }

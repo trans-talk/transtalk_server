@@ -1,13 +1,13 @@
 package com.wootech.transtalk.config.util;
 
 import com.wootech.transtalk.enums.UserRole;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.wootech.transtalk.exception.custom.UnauthorizedException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -16,6 +16,8 @@ import java.rmi.ServerException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
+
+import static com.wootech.transtalk.exception.ErrorMessages.*;
 
 @Slf4j
 @Component
@@ -59,7 +61,7 @@ public class JwtUtil {
         if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
             return tokenValue.substring(7);
         }
-        throw new ServerException("JWT Not Found");
+        throw new UnauthorizedException(JWT_DOES_NOT_EXIST_ERROR, HttpStatusCode.valueOf(401));
     }
 
     public Claims extractClaims(String token) {
@@ -68,5 +70,46 @@ public class JwtUtil {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    // 웹소켓을 위해 추가
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+            log.warn(EXPIRED_JWT_TOKEN_ERROR + ": {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.warn(UNSUPPORTED_JWT_TOKEN_ERROR + ": {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            log.warn(MALFORMED_JWT_TOKEN_ERROR + ": {}", e.getMessage());
+        } catch (SecurityException e) {
+            log.warn(SECURITY_VALIDATION_ERROR + ": {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.warn(INVALID_JWT_SIGNATURE_ERROR + ": {}", e.getMessage());
+        } catch (Exception e) {
+            log.error(INTERNAL_SERVER_ERROR + ": {}", e.getMessage());
+        }
+        return false;
+    }
+
+    public String getEmail(String token) {
+        return extractClaims(token).get("email", String.class);
+    }
+
+    public Long getUserId(String token) {
+        return Long.valueOf(extractClaims(token).getSubject());
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Date expiration = extractClaims(token).getExpiration();
+            return expiration.before(new Date());
+        } catch (Exception e) {
+            return true;
+        }
     }
 }
