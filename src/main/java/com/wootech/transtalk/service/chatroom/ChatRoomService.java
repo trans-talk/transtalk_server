@@ -48,29 +48,38 @@ public class ChatRoomService {
         User currentUser = userService.getUserById(currentUserId);
         Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, pageable);
 
-        return chatRooms.map(chatRoom -> {
-            User recipient = chatRoom.getRecipient(currentUserId);
-
-            Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
-            long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
-
-            return new ChatRoomResponse(
-                    chatRoom.getId(),
-                    recipient.getPicture(),
-                    recipient.getName(),
-                    chatRoom.getLanguage().getCode(),
-                    lastChat != null ? lastChat.getOriginalContent() : "",
-                    lastChat != null ? lastChat.getTranslatedContent() : "",
-                    lastChat != null ? lastChat.getCreatedAt() : null,
-                    lastChat != null ? (int) (lastChat.getId() - lastReadChatId) : 0);
-        });
+        return chatRooms.map(chatRoom -> convertToChatRoomResponse(currentUserId, chatRoom));
     }
 
+    @Transactional(readOnly = true)
+    public ChatRoomResponse updateChatRoomInfo(Long chatRoomId, Long currentUserId) {
+        ChatRoom findChatRoom = findById(chatRoomId);
+
+        return convertToChatRoomResponse(currentUserId, findChatRoom);
+    }
+
+    @Transactional(readOnly = true)
     public ChatRoom findById(Long chatRoomId) {
         return chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> {
                     log.error("[ChatRoomService] Received ChatRoom Id={}", chatRoomId);
                     return new NotFoundException(CHAT_ROOM_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404));
                 });
+    }
+
+    private ChatRoomResponse convertToChatRoomResponse(Long currentUserId, ChatRoom chatRoom) {
+        User recipient = chatRoom.getRecipient(currentUserId);
+        Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
+        long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
+
+        return new ChatRoomResponse(
+                chatRoom.getId(),
+                recipient.getPicture(),
+                recipient.getName(),
+                chatRoom.getLanguage().getCode(),
+                lastChat != null ? lastChat.getOriginalContent() : "",
+                lastChat != null ? lastChat.getTranslatedContent() : "",
+                lastChat != null ? lastChat.getCreatedAt() : null,
+                lastChat != null ? (int) (lastChat.getId() - lastReadChatId) : 0);
     }
 }
