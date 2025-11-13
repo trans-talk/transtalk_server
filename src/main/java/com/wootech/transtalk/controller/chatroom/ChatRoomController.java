@@ -8,6 +8,7 @@ import com.wootech.transtalk.dto.chatroom.CreateChatRoomRequest;
 import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +37,7 @@ public class ChatRoomController {
 
     @PostMapping
     public ApiResponse<CreateChatRoomResponse> createChatRoom(@AuthenticationPrincipal AuthUser authUser,
-                                                              @RequestBody CreateChatRoomRequest request) {
+                                                              @Valid @RequestBody CreateChatRoomRequest request) {
         CreateChatRoomResponse response = chatRoomService.save(request.language(), authUser.getEmail(),
                 request.recipientEmail());
         return ApiResponse.success(response);

@@ -5,12 +5,21 @@ import com.wootech.transtalk.exception.custom.ApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice(basePackages = "com.wootech.transtalk.controller")
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<String>> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e) {
+        String errorMessage = e.getBindingResult().getFieldError().getDefaultMessage();
+        log.error("[GlobalExceptionHandler] MethodArgumentNotValid Error: {}", errorMessage);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(errorMessage, "400"));
+    }
 
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<ApiResponse<String>> handleAppException(ApplicationException e) {
