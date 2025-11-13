@@ -28,7 +28,7 @@ public class ChatRoomController {
 
     @GetMapping
     public ApiResponse<ChatRoomListResponse> findChatRooms(@AuthenticationPrincipal AuthUser authUser,
-                                                           @PageableDefault(size = 40) Pageable pageable) {
+                                                           @PageableDefault(size = 20) Pageable pageable) {
         Page<ChatRoomResponse> pages = chatRoomService.findChatRoomsByUserId(authUser.getUserId(),
                 pageable);
         ChatRoomListResponse response = ChatRoomListResponse.from(pages);
