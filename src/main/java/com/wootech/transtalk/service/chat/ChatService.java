@@ -1,6 +1,5 @@
 package com.wootech.transtalk.service.chat;
 
-import com.wootech.transtalk.dto.ChatMessageRequest;
 import com.wootech.transtalk.dto.ChatMessageResponse;
 import com.wootech.transtalk.entity.Chat;
 import com.wootech.transtalk.entity.ChatRoom;
@@ -8,6 +7,7 @@ import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.repository.ChatRepository;
 import com.wootech.transtalk.repository.UserRepository;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
+import com.wootech.transtalk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatService {
     private final ChatRepository chatRepository;
-    private final UserRepository userRepository;
     private final ChatRoomService chatRoomService;
+    private final UserService userService;
 
     @Transactional
     public ChatMessageResponse save(String message, Long chatRoomId, String senderEmail) {
-        //TODO Must be changed to use authservice.
-        User sender = userRepository.findByEmail(senderEmail).orElseThrow(() -> new RuntimeException("유저 없음"));
+        User sender = userService.getUserByEmail(senderEmail);
         ChatRoom findChatRoom = chatRoomService.findById(chatRoomId);
 
         Chat chat = new Chat(message, sender, findChatRoom);

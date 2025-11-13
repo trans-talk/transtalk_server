@@ -8,6 +8,7 @@ import com.wootech.transtalk.exception.custom.NotFoundException;
 import com.wootech.transtalk.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import static com.wootech.transtalk.exception.ErrorMessages.USER_NOT_FOUND_ERROR;
@@ -49,14 +50,14 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("[AuthService] Received User Id={}", id);
-                    return new NotFoundException(USER_NOT_FOUND_ERROR);
+                    return new NotFoundException(USER_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404));
                 });
     }
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     log.error("[AuthService] Received User Email={}", email);
-                    return new NotFoundException(USER_NOT_FOUND_ERROR);
+                    return new NotFoundException(USER_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404));
                 });
     }
 }

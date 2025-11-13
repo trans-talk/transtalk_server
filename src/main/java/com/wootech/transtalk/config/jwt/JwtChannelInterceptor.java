@@ -1,4 +1,4 @@
-package com.wootech.transtalk.config;
+package com.wootech.transtalk.config.jwt;
 
 import com.wootech.transtalk.config.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor

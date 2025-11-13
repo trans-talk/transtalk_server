@@ -1,6 +1,6 @@
 package com.wootech.transtalk.config;
 
-import com.wootech.transtalk.config.jwt.JwtHandShakeInterceptor;
+import com.wootech.transtalk.config.jwt.JwtChannelInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;

@@ -4,6 +4,9 @@ import static com.wootech.transtalk.exception.ErrorMessages.NOT_SUPPORTED_LANGUA
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.wootech.transtalk.exception.custom.BadRequestException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+
 import java.util.Arrays;
 
 public enum TranslateLanguage {
@@ -27,6 +30,6 @@ public enum TranslateLanguage {
         return Arrays.stream(values())
                 .filter(lang -> lang.code.equalsIgnoreCase(code))
                 .findFirst()
-                .orElseThrow(() -> new BadRequestException(NOT_SUPPORTED_LANGUAGE_CODE_ERROR));
+                .orElseThrow(() -> new BadRequestException(NOT_SUPPORTED_LANGUAGE_CODE_ERROR, HttpStatusCode.valueOf(400)));
     }
 }

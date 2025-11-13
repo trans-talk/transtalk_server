@@ -4,7 +4,6 @@ import com.wootech.transtalk.config.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,6 +21,8 @@ import org.springframework.security.web.servletapi.SecurityContextHolderAwareReq
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AppAccessDeniedHandler appAccessDeniedHandler;
+    private final AppAuthenticationEntryPoint appAuthenticationEntryPoint;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -45,8 +46,13 @@ public class SecurityConfig {
                         .requestMatchers(request -> request.getRequestURI().startsWith("/api/v1/auth")).permitAll()
                         .requestMatchers("/ws/**","/ws-connect/**", "/ws-connect").permitAll() // websocket
                         .requestMatchers("/ws-chat/**", "/ws-stomp/**").permitAll() // stomp
-                        .requestMatchers("/app/**", "/topic/**", "/queue/**").permitAll()
-                        .anyRequest().authenticated()
-                ).build();
+                        .requestMatchers("/app/**", "/topic/**", "/queue/**").permitAll() // end point
+                        .requestMatchers("/public/**").permitAll()
+                        .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(appAccessDeniedHandler)
+                        .authenticationEntryPoint(appAuthenticationEntryPoint)
+                )
+                .build();
     }
 }
