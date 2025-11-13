@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,7 +70,7 @@ public class ChatRoomService {
         return chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> {
                     log.error("[ChatRoomService] Received ChatRoom Id={}", chatRoomId);
-                    return new NotFoundException(CHAT_ROOM_NOT_FOUND_ERROR);
+                    return new NotFoundException(CHAT_ROOM_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404));
                 });
     }
 }

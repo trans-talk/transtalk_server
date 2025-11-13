@@ -5,19 +5,14 @@ import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.dto.chatroom.ChatRoomListResponse;
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import com.wootech.transtalk.dto.chatroom.CreateChatRoomRequest;
-import com.wootech.transtalk.enums.TranslateLanguage;
-import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
+import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor

@@ -77,7 +77,7 @@ public class GoogleClient {
                      String body = new String(response.getBody().readAllBytes());
                      log.error("[GoogleAPI] Raw Response: {}", body);
 
-                     throw new GoogleApiException("Token Request Failed: " + body);
+                     throw new GoogleApiException("Token Request Failed: " + body, response.getStatusCode());
                  }))
                  .body(GoogleApiResponse.class);
 
@@ -91,7 +91,7 @@ public class GoogleClient {
     private String extractAccessCode(GoogleApiResponse response) {
         if (response == null || response.getAccessToken() == null || response.getAccessToken().isEmpty()) {
             log.warn("[GoogleAPI] Empty Response From Google");
-            throw new GoogleApiException(ACCESS_TOKEN_DOES_NOT_EXISTS_ERROR);
+            throw new GoogleApiException(ACCESS_TOKEN_DOES_NOT_EXISTS_ERROR, HttpStatusCode.valueOf(401));
         }
         return response.getAccessToken();
     }
@@ -110,7 +110,7 @@ public class GoogleClient {
                     String body = new String(response.getBody().readAllBytes());
                     log.error("[GoogleAPI] Raw Response: {}", body);
 
-                    throw new GoogleApiException("Profile Request Failed: " + body);
+                    throw new GoogleApiException("Profile Request Failed: " + body, response.getStatusCode());
                 }))
                 .body(GoogleProfileResponse.class);
 
