@@ -18,8 +18,8 @@ import java.security.Principal;
 public class ChatController {
     private final ChatService chatService;
 
-    @MessageMapping("/chat.{chatRoomId}")
-    @SendTo("/topic/chat.[chatRoomId}")
+    @MessageMapping("/chat/{chatRoomId}")
+    @SendTo("/topic/chat/{chatRoomId}")
     public ChatMessageResponse sendMessage(@DestinationVariable Long chatRoomId,
                                            ChatMessageRequest chatMessageRequest,
                                            Principal principal)

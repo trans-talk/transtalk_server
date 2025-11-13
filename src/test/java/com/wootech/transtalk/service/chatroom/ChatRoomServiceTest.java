@@ -46,7 +46,7 @@ class ChatRoomServiceTest {
     @Test
     void findChatRoomsByUserId() {
         CreateChatRoomResponse response = chatRoomService.save(TranslateLanguage.KOREAN, "tae@google", "other@google");
-        chatService.save(new ChatMessageRequest("hello"), response.chatRoomId(), "tae@google");
+        chatService.save("nice to meet you", response.chatRoomId(), "tae@google");
         Pageable pageable = PageRequest.of(0, 40);
         Page<ChatRoomResponse> responses = chatRoomService.findChatRoomsByUserId(user.getId(), pageable);
 
@@ -61,13 +61,13 @@ class ChatRoomServiceTest {
                         ChatRoomResponse::translatedRecentMessage
                 ).containsExactlyInAnyOrder(
                         tuple(
-                                "hello",
+                                "nice to meet you",
                                 1,
                                 response.chatRoomId(),
                                 recipient.getName(),
                                 recipient.getPicture(),
                                 TranslateLanguage.KOREAN.getCode(),
-                                (String) null
+                                "만나서 반갑습니다"
                         )
                 );
     }

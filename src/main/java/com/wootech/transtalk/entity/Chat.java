@@ -40,4 +40,8 @@ public class Chat extends TimeStamped{
         this.sender = sender;
         this.chatRoom = chatRoom;
     }
+
+    public void completeTranslate(String translatedContent) {
+        this.translatedContent = translatedContent;
+    }
 }

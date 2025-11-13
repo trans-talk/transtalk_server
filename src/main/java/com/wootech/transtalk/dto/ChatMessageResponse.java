@@ -1,4 +1,7 @@
 package com.wootech.transtalk.dto;
 
-public record ChatMessageResponse(String originalMessage,String translatedMessage,String senderEmail) {
+import java.time.Instant;
+
+public record ChatMessageResponse(Long chatId, String originalMessage, String translatedMessage,
+                                  String senderEmail, Instant sendAt, int unReadCount) {
 }
