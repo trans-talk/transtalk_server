@@ -37,7 +37,7 @@ class ChatRoomServiceTest {
         User recipient = userService.findByEmailOrGet(
                 "other@google", "other", UserRole.ROLE_USER, "img2");
         Long savedChatRoomId = chatRoomService.save("ko", "tae@google", "other@google");
-        chatService.save(new ChatMessageRequest("hello"), savedChatRoomId, "tae@google");
+        chatService.save("hello", savedChatRoomId, "tae@google");
         Pageable pageable = PageRequest.of(0, 40);
         Page<ChatRoomResponse> responses = chatRoomService.findChatRoomsByUserId(user.getId(),pageable);
 

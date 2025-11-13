@@ -5,23 +5,29 @@ import com.wootech.transtalk.dto.ChatMessageResponse;
 import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.service.chat.ChatService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatService chatService;
 
-    @MessageMapping("/chat.{chatRoomId}")
-    @SendTo("/topic/chat.{chatRoomId}")
+    @MessageMapping("/chat/{chatRoomId}")
+    @SendTo("/topic/chat/{chatRoomId}")
     public ChatMessageResponse sendMessage(@DestinationVariable Long chatRoomId,
-                                           ChatMessageRequest request,
-                                           @AuthenticationPrincipal AuthUser authUser) {
+                                           String message,
+                                           Principal principal) {
         //TODO Change to pass using a DTO.
-        return chatService.save(request, chatRoomId, authUser.getEmail());
+        log.info("Received message='{}' from user='{}'", message, principal != null ? principal.getName() : "null");
+        return chatService.save(message, chatRoomId, principal.getName());
     }
 }
