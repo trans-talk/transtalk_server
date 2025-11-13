@@ -4,11 +4,13 @@ import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.exception.custom.NotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Arrays;
 
 import static com.wootech.transtalk.enums.UserRole.Authority.USER;
+import static com.wootech.transtalk.exception.ErrorMessages.INVALID_USER_ROLE_ERROR;
 
 @Getter
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ public enum UserRole implements GrantedAuthority {
         return Arrays.stream(UserRole.values())
                 .filter(r -> r.getUserRole().equalsIgnoreCase(role))
                 .findFirst()
-                .orElseThrow(() ->  new NotFoundException("유효하지 않은 UserRole입니다."));
+                .orElseThrow(() ->  new NotFoundException(INVALID_USER_ROLE_ERROR, HttpStatusCode.valueOf(404)));
     }
 
     @Override

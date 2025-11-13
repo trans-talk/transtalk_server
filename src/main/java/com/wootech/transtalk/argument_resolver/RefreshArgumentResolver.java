@@ -1,4 +1,4 @@
-package com.wootech.transtalk.config;
+package com.wootech.transtalk.argument_resolver;
 
 import com.wootech.transtalk.config.jwt.RefreshToken;
 import com.wootech.transtalk.exception.custom.UnauthorizedException;
@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -26,7 +27,7 @@ public class RefreshArgumentResolver implements HandlerMethodArgumentResolver {
         boolean isStringType = parameter.getParameterType().equals(String.class);
 
         if (hasRefreshTokenAnnotation && !isStringType) {
-            throw new UnauthorizedException(REFRESH_TOKEN_FORMATION_ERROR);
+            throw new UnauthorizedException(REFRESH_TOKEN_FORMATION_ERROR, HttpStatusCode.valueOf(401));
         }
         return hasRefreshTokenAnnotation;
     }
@@ -37,7 +38,7 @@ public class RefreshArgumentResolver implements HandlerMethodArgumentResolver {
         String refreshToken = extractRefreshTokenFromCookies(request);
 
         if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new UnauthorizedException(REFRESH_TOKEN_DOES_NOT_EXISTS_ERROR);
+            throw new UnauthorizedException(REFRESH_TOKEN_DOES_NOT_EXISTS_ERROR, HttpStatusCode.valueOf(401));
         }
 
         // Redis에서 refreshToken 검증
@@ -45,7 +46,7 @@ public class RefreshArgumentResolver implements HandlerMethodArgumentResolver {
         String storedToken = bucket.get();
 
         if (storedToken == null || !storedToken.equals(refreshToken)) {
-            throw new UnauthorizedException(INVALID_REFRESH_TOKEN_ERROR);
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN_ERROR, HttpStatusCode.valueOf(401));
         }
 
         return refreshToken;

@@ -10,6 +10,7 @@ import com.wootech.transtalk.exception.custom.UnauthorizedException;
 import com.wootech.transtalk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -71,7 +72,7 @@ public class AuthService {
         String storedToken = refreshTokenService.getRefreshToken(refreshToken);
 
         if (storedToken == null || !storedToken.equals(refreshToken)) {
-            throw new UnauthorizedException(INVALID_REFRESH_TOKEN_ERROR);
+            throw new UnauthorizedException(INVALID_REFRESH_TOKEN_ERROR, HttpStatusCode.valueOf(401));
         }
 
         User foundUser = userService.getUserById(userId);
