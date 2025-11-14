@@ -1,25 +1,17 @@
 package com.wootech.transtalk.entity;
 
-import static com.wootech.transtalk.exception.ErrorMessages.*;
-
 import com.wootech.transtalk.enums.TranslateLanguage;
-import com.wootech.transtalk.exception.ErrorMessages;
 import com.wootech.transtalk.exception.custom.NotFoundException;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatusCode;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.wootech.transtalk.exception.ErrorMessages.PARTICIPANT_NOT_FOUND_ERROR;
 
 @Getter
 @Entity
@@ -32,7 +24,7 @@ public class ChatRoom extends TimeStamped {
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private TranslateLanguage language;
-    @OneToMany(mappedBy = "chatRoom",cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.PERSIST)
     private List<Participant> participants = new ArrayList<>();
 
     public ChatRoom(TranslateLanguage language) {
@@ -46,12 +38,6 @@ public class ChatRoom extends TimeStamped {
     public User getRecipient(Long currentUserId) {
         return participants.stream().filter(participant -> !participant.getUser().getId().equals(currentUserId))
                 .map(Participant::getUser).findFirst()
-                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
-    }
-
-    public Long getLastReadChatId(Long currentUserId) {
-        return participants.stream().filter(participant -> participant.getUser().getId().equals(currentUserId))
-                .map(Participant::getLastReadChatId).findFirst()
                 .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
     }
 }

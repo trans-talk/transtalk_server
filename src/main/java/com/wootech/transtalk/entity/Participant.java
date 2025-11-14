@@ -1,13 +1,7 @@
 package com.wootech.transtalk.entity;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,21 +19,14 @@ public class Participant {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @Column
-    private Long lastReadChatId;
 
     public Participant(User user, ChatRoom chatRoom) {
         this.user = user;
         joinChatRoom(chatRoom);
-        setLastReadChatId();
     }
 
     private void joinChatRoom(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;
         chatRoom.addParticipant(this);
-    }
-
-    private void setLastReadChatId() {
-        this.lastReadChatId = 0L;
     }
 }

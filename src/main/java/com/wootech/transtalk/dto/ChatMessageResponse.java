@@ -1,4 +1,6 @@
 package com.wootech.transtalk.dto;
 
-public record ChatMessageResponse(String originalMessage,String translatedMessage,String senderEmail) {
+import com.wootech.transtalk.enums.TranslationStatus;
+
+public record ChatMessageResponse(String originalMessage, TranslationStatus status, String translatedMessage, String senderEmail) {
 }

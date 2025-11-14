@@ -10,9 +10,8 @@ import com.wootech.transtalk.entity.Participant;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.exception.custom.NotFoundException;
-import com.wootech.transtalk.repository.chat.ChatRepository;
-import com.wootech.transtalk.repository.chat.ChatRepository;
 import com.wootech.transtalk.repository.ChatRoomRepository;
+import com.wootech.transtalk.service.chat.ChatService;
 import com.wootech.transtalk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +21,15 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserService userService;
-    private final ChatRepository chatRepository;
+    private final ChatService chatService;
 
     @Transactional
     public CreateChatRoomResponse save(TranslateLanguage language, String senderEmail, String recipientEmail) {
@@ -47,24 +48,26 @@ public class ChatRoomService {
     @Transactional
     public Page<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId, Pageable pageable) {
         User currentUser = userService.getUserById(currentUserId);
-        Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, pageable);
+        Page<ChatRoom> chatRooms = chatRoomRepository.findAllByUserId(currentUserId, pageable);
 
-        return chatRooms.map(chatRoom -> {
+        Page<ChatRoomResponse> chatRoomResponsePage = chatRooms.map(chatRoom -> {
             User recipient = chatRoom.getRecipient(currentUserId);
+            Chat lastChat = chatService.findLastChat(chatRoom.getId());
+            long unreadCount = chatService.countUnreadChats(chatRoom.getId());
 
-            Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
-            long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
-
-            return new ChatRoomResponse(
-                    chatRoom.getId(),
-                    recipient.getPicture(),
-                    recipient.getName(),
-                    chatRoom.getLanguage().getCode(),
-                    lastChat != null ? lastChat.getOriginalContent() : "",
-                    lastChat != null ? lastChat.getTranslatedContent() : "",
-                    lastChat != null ? lastChat.getCreatedAt() : null,
-                    lastChat != null ? (int) (lastChat.getId() - lastReadChatId) : 0);
+            return ChatRoomResponse.builder()
+                    .chatroomId(chatRoom.getId())
+                    .originalRecentMessage(lastChat.getOriginalContent())
+                    .translatedRecentMessage(lastChat.getTranslatedContent())
+                    .selectedLanguage(chatRoom.getLanguage().getCode())
+                    .recentMessageTime(Instant.from(lastChat.getSendAt()))
+                    .recipientName(recipient.getName())
+                    .recipientPicture(recipient.getPicture())
+                    .unreadMessageCount(unreadCount)
+                    .build();
         });
+
+        return chatRoomResponsePage;
     }
 
     public ChatRoom findById(Long chatRoomId) {
@@ -75,3 +78,4 @@ public class ChatRoomService {
                 });
     }
 }
+

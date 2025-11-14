@@ -44,8 +44,7 @@ public class SecurityConfig {
                 .rememberMe(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(request -> request.getRequestURI().startsWith("/api/v1/auth")).permitAll()
-                        .requestMatchers("/ws/**","/ws-connect/**", "/ws-connect").permitAll() // websocket
-                        .requestMatchers("/ws-chat/**", "/ws-stomp/**").permitAll() // stomp
+                        .requestMatchers("/ws-connect/**", "/ws-connect").permitAll() // websocket
                         .requestMatchers("/app/**", "/topic/**", "/queue/**").permitAll() // end point
                         .requestMatchers("/public/**").permitAll()
                         .anyRequest().authenticated())
