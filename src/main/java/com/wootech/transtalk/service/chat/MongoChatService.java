@@ -30,7 +30,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
-//@Service
+@Service
 @RequiredArgsConstructor
 public class MongoChatService {
     private final UserService userService;

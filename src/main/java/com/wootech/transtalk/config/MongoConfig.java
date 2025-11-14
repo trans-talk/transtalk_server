@@ -14,7 +14,7 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-//@Configuration
+@Configuration
 public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Value("${spring.data.mongodb.uri}")
