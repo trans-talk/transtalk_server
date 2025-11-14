@@ -10,13 +10,18 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
+public interface ChatRoomRepository extends JpaRepository<ChatRoom,Long> {
     @Query("""
-            SELECT DISTINCT cr FROM ChatRoom cr
+            SELECT cr FROM ChatRoom cr
             JOIN cr.participants p
             WHERE p.user.id = :userId
+            ORDER BY(
+            SELECT MAX(c.createdAt)
+            FROM Chat c
+            WHERE c.chatRoom.id = cr.id
+            ) DESC 
             """)
-    Page<ChatRoom> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
+    Page<ChatRoom> findByParticipantsUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query("""
             SELECT cr 
@@ -29,5 +34,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             """)
     Optional<ChatRoom> findChatRoomBetweenUsers(@Param("userIdA") Long userIdA,
                                                 @Param("userIdB") Long userIdB,
-                                                @Param("language") TranslateLanguage language);
+                                                @Param("language")TranslateLanguage language);
 }

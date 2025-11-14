@@ -19,6 +19,8 @@ public class Participant {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    @Column
+    private Long lastReadChatId = 0L;
 
     public Participant(User user, ChatRoom chatRoom) {
         this.user = user;
@@ -29,4 +31,12 @@ public class Participant {
         this.chatRoom = chatRoom;
         chatRoom.addParticipant(this);
     }
+
+    public void markAsExited(Long lastReadChatId) {
+        if (this.lastReadChatId >= lastReadChatId) {
+            throw new RuntimeException("");
+        }
+        this.lastReadChatId = lastReadChatId;
+    }
+
 }

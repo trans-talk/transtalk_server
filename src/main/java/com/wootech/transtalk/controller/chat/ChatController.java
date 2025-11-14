@@ -33,9 +33,8 @@ public class ChatController {
                                            ChatMessageRequest chatMessageRequest,
                                            Principal principal)
     {
-        log.info("[ChatController] Connected");
-        log.info("[ChatController] Received ChatRoom ID={}", chatRoomId);
-        return chatService.saveChat(principal, chatMessageRequest, chatRoomId);
+        log.info("Received message='{}' from user='{}'", chatMessageRequest.content(), principal != null ? principal.getName() : "null");
+        return chatService.save(chatMessageRequest.content(), chatRoomId, principal.getName());
     }
 
     @GetMapping("/api/v1/chatrooms/{chatRoomId}/chats")
@@ -44,7 +43,8 @@ public class ChatController {
             @PathVariable Long chatRoomId,
             @RequestParam(defaultValue = "40") int size
     ) {
-        return chatService.getChats(authUser, chatRoomId, size);
+        return null;
+//        return chatService.getChats(authUser, chatRoomId, size);
     }
 
     @GetMapping("/api/v1/chatrooms/{chatRoomId}/last")
@@ -53,7 +53,8 @@ public class ChatController {
     ) {
         // 사용자 검증
         userService.getUserById(authUser.getUserId());
-        return chatService.findLastChat(chatRoomId);
+        return null;
+//        return chatService.findLastChat(chatRoomId);
     }
 
     @GetMapping("/api/v1/chatrooms/{chatRoomId}/unread")
@@ -62,7 +63,8 @@ public class ChatController {
 
     ) {
         userService.getUserById(authUser.getUserId());
-        return chatService.countUnreadChats(chatRoomId);
+        return 0;
+//        return chatService.countUnreadChats(chatRoomId);
     }
 
 }

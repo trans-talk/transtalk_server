@@ -3,6 +3,7 @@ package com.wootech.transtalk.service.chatroom;
 
 import static org.assertj.core.groups.Tuple.tuple;
 
+import com.wootech.transtalk.dto.ChatMessageRequest;
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
 import com.wootech.transtalk.entity.User;
@@ -45,6 +46,7 @@ class ChatRoomServiceTest {
     @Test
     void findChatRoomsByUserId() {
         CreateChatRoomResponse response = chatRoomService.save(TranslateLanguage.KOREAN, "tae@google", "other@google");
+        chatService.save("nice to meet you", response.chatRoomId(), "tae@google");
         Pageable pageable = PageRequest.of(0, 40);
         Page<ChatRoomResponse> responses = chatRoomService.findChatRoomsByUserId(user.getId(), pageable);
 
@@ -59,13 +61,13 @@ class ChatRoomServiceTest {
                         ChatRoomResponse::translatedRecentMessage
                 ).containsExactlyInAnyOrder(
                         tuple(
-                                "hello",
-                                1,
+                                "nice to meet you",
+                                1L,
                                 response.chatRoomId(),
                                 recipient.getName(),
                                 recipient.getPicture(),
                                 TranslateLanguage.KOREAN.getCode(),
-                                (String) null
+                                "만나서 반갑습니다"
                         )
                 );
     }

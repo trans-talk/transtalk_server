@@ -40,4 +40,17 @@ public class ChatRoom extends TimeStamped {
                 .map(Participant::getUser).findFirst()
                 .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
     }
+
+    public Long getLastReadChatId(Long currentUserId) {
+        return participants.stream().filter(participant -> participant.getUser().getId().equals(currentUserId))
+                .map(Participant::getLastReadChatId).findFirst()
+                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
+    }
+
+    public void exit(Long currentUserId, Long lastReadChatId) {
+        Participant me = participants.stream()
+                .filter(participant -> participant.getUser().getId().equals(currentUserId)).findFirst()
+                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
+        me.markAsExited(lastReadChatId);
+    }
 }

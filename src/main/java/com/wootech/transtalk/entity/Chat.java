@@ -1,25 +1,61 @@
 package com.wootech.transtalk.entity;
 
-import com.wootech.transtalk.enums.TranslationStatus;
-import jakarta.persistence.Id;
-import lombok.*;
-import org.springframework.data.mongodb.core.mapping.Document;
+import static com.wootech.transtalk.exception.ErrorMessages.DUPLICATE_TRANSLATION_ERROR;
 
-import java.time.LocalDateTime;
+import com.wootech.transtalk.enums.TranslationStatus;
+import com.wootech.transtalk.event.Events;
+import com.wootech.transtalk.event.MessageNotificationEvent;
+import com.wootech.transtalk.exception.custom.ConflictException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatusCode;
 
 @Getter
-@Document(collection = "chat")
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
-public class Chat {
+public class Chat extends TimeStamped {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false)
     private String originalContent;
-    private TranslationStatus translationStatus;
+    @Column(nullable = true)
     private String translatedContent;
-    private boolean read = false;
-    private Long chatroomId;
-    private Long senderId;
-    private LocalDateTime sendAt = LocalDateTime.now();
+    @Column(nullable = false)
+    private int unreadCount;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User sender;
+    @ManyToOne
+    @JoinColumn(name = "chat_room_id")
+    private ChatRoom chatRoom;
+    private TranslationStatus translationStatus;
+
+    public Chat(String originalContent, User sender, ChatRoom chatRoom) {
+        this.originalContent = originalContent;
+        this.unreadCount = 1;
+        this.sender = sender;
+        this.chatRoom = chatRoom;
+        this.translationStatus = TranslationStatus.PENDING;
+    }
+
+    public void completeTranslate(String translatedContent) {
+        validDuplicateTranslation();
+        this.translatedContent = translatedContent;
+        Events.raise(new MessageNotificationEvent(chatRoom.getId(), sender.getId()));
+    }
+
+    private void validDuplicateTranslation() {
+        if (this.translatedContent != null) {
+            throw new ConflictException(DUPLICATE_TRANSLATION_ERROR, HttpStatusCode.valueOf(409));
+        }
+    }
 }
