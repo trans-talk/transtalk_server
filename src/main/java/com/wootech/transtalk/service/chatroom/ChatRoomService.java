@@ -13,6 +13,7 @@ import com.wootech.transtalk.exception.custom.NotFoundException;
 import com.wootech.transtalk.repository.ChatRepository;
 import com.wootech.transtalk.repository.ChatRoomRepository;
 import com.wootech.transtalk.service.user.UserService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -81,5 +82,17 @@ public class ChatRoomService {
                 lastChat != null ? lastChat.getTranslatedContent() : "",
                 lastChat != null ? lastChat.getCreatedAt() : null,
                 lastChat != null ? (int) (lastChat.getId() - lastReadChatId) : 0);
+    }
+
+    @Transactional
+    public void updateLastReadChatMessage(String userEamil, Long chatRoomId) {
+        ChatRoom chatRoom = findById(chatRoomId);
+        User currentUser = userService.getUserByEmail(userEamil);
+        User recipient = chatRoom.getRecipient(currentUser.getId());
+
+        Optional<Chat> lastRecipientChat = chatRepository.findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(
+                recipient.getId(),
+                chatRoomId);
+        lastRecipientChat.ifPresent(chat -> chatRoom.exit(currentUser.getId(), chat.getId()));
     }
 }
