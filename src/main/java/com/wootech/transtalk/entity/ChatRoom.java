@@ -3,7 +3,6 @@ package com.wootech.transtalk.entity;
 import static com.wootech.transtalk.exception.ErrorMessages.*;
 
 import com.wootech.transtalk.enums.TranslateLanguage;
-import com.wootech.transtalk.exception.ErrorMessages;
 import com.wootech.transtalk.exception.custom.NotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -53,5 +52,12 @@ public class ChatRoom extends TimeStamped {
         return participants.stream().filter(participant -> participant.getUser().getId().equals(currentUserId))
                 .map(Participant::getLastReadChatId).findFirst()
                 .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
+    }
+
+    public void exit(Long currentUserId, Long lastReadChatId) {
+        Participant me = participants.stream()
+                .filter(participant -> participant.getUser().getId().equals(currentUserId)).findFirst()
+                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
+        me.markAsExited(lastReadChatId);
     }
 }

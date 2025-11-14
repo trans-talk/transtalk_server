@@ -1,5 +1,10 @@
 package com.wootech.transtalk.entity;
 
+import static com.wootech.transtalk.exception.ErrorMessages.DUPLICATE_TRANSLATION_ERROR;
+
+import com.wootech.transtalk.event.Events;
+import com.wootech.transtalk.event.MessageNotificationEvent;
+import com.wootech.transtalk.exception.custom.ConflictException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,17 +12,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatusCode;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Chat extends TimeStamped{
+public class Chat extends TimeStamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,10 +37,22 @@ public class Chat extends TimeStamped{
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
-    public Chat(String originalContent, User sender,ChatRoom chatRoom) {
+    public Chat(String originalContent, User sender, ChatRoom chatRoom) {
         this.originalContent = originalContent;
         this.unreadCount = 1;
         this.sender = sender;
         this.chatRoom = chatRoom;
+    }
+
+    public void completeTranslate(String translatedContent) {
+        validDuplicateTranslation();
+        this.translatedContent = translatedContent;
+        Events.raise(new MessageNotificationEvent(chatRoom.getId(), sender.getId()));
+    }
+
+    private void validDuplicateTranslation() {
+        if (this.translatedContent != null) {
+            throw new ConflictException(DUPLICATE_TRANSLATION_ERROR, HttpStatusCode.valueOf(409));
+        }
     }
 }

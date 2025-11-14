@@ -13,6 +13,7 @@ import com.wootech.transtalk.exception.custom.NotFoundException;
 import com.wootech.transtalk.repository.ChatRepository;
 import com.wootech.transtalk.repository.ChatRoomRepository;
 import com.wootech.transtalk.service.user.UserService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -48,29 +49,50 @@ public class ChatRoomService {
         User currentUser = userService.getUserById(currentUserId);
         Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, pageable);
 
-        return chatRooms.map(chatRoom -> {
-            User recipient = chatRoom.getRecipient(currentUserId);
-
-            Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
-            long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
-
-            return new ChatRoomResponse(
-                    chatRoom.getId(),
-                    recipient.getPicture(),
-                    recipient.getName(),
-                    chatRoom.getLanguage().getCode(),
-                    lastChat != null ? lastChat.getOriginalContent() : "",
-                    lastChat != null ? lastChat.getTranslatedContent() : "",
-                    lastChat != null ? lastChat.getCreatedAt() : null,
-                    lastChat != null ? (int) (lastChat.getId() - lastReadChatId) : 0);
-        });
+        return chatRooms.map(chatRoom -> convertToChatRoomResponse(currentUserId, chatRoom));
     }
 
+    @Transactional(readOnly = true)
+    public ChatRoomResponse updateChatRoomInfo(Long chatRoomId, Long currentUserId) {
+        ChatRoom findChatRoom = findById(chatRoomId);
+
+        return convertToChatRoomResponse(currentUserId, findChatRoom);
+    }
+
+    @Transactional(readOnly = true)
     public ChatRoom findById(Long chatRoomId) {
         return chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> {
                     log.error("[ChatRoomService] Received ChatRoom Id={}", chatRoomId);
                     return new NotFoundException(CHAT_ROOM_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404));
                 });
+    }
+
+    private ChatRoomResponse convertToChatRoomResponse(Long currentUserId, ChatRoom chatRoom) {
+        User recipient = chatRoom.getRecipient(currentUserId);
+        Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
+        long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
+
+        return new ChatRoomResponse(
+                chatRoom.getId(),
+                recipient.getPicture(),
+                recipient.getName(),
+                chatRoom.getLanguage().getCode(),
+                lastChat != null ? lastChat.getOriginalContent() : "",
+                lastChat != null ? lastChat.getTranslatedContent() : "",
+                lastChat != null ? lastChat.getCreatedAt() : null,
+                lastChat != null ? (int) (lastChat.getId() - lastReadChatId) : 0);
+    }
+
+    @Transactional
+    public void updateLastReadChatMessage(String userEamil, Long chatRoomId) {
+        ChatRoom chatRoom = findById(chatRoomId);
+        User currentUser = userService.getUserByEmail(userEamil);
+        User recipient = chatRoom.getRecipient(currentUser.getId());
+
+        Optional<Chat> lastRecipientChat = chatRepository.findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(
+                recipient.getId(),
+                chatRoomId);
+        lastRecipientChat.ifPresent(chat -> chatRoom.exit(currentUser.getId(), chat.getId()));
     }
 }

@@ -26,12 +26,11 @@ public class Participant {
     @JoinColumn(name = "user_id")
     private User user;
     @Column
-    private Long lastReadChatId;
+    private Long lastReadChatId = 0L;
 
     public Participant(User user, ChatRoom chatRoom) {
         this.user = user;
         joinChatRoom(chatRoom);
-        setLastReadChatId();
     }
 
     private void joinChatRoom(ChatRoom chatRoom) {
@@ -39,7 +38,11 @@ public class Participant {
         chatRoom.addParticipant(this);
     }
 
-    private void setLastReadChatId() {
-        this.lastReadChatId = 0L;
+    public void markAsExited(Long lastReadChatId) {
+        if (this.lastReadChatId >= lastReadChatId) {
+            throw new RuntimeException("");
+        }
+        this.lastReadChatId = lastReadChatId;
     }
+
 }
