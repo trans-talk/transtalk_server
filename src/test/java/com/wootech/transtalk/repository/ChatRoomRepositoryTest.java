@@ -1,7 +1,5 @@
 package com.wootech.transtalk.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -16,6 +14,7 @@ import com.wootech.transtalk.entity.Participant;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.enums.UserRole;
+import com.wootech.transtalk.repository.user.UserRepository;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,6 @@ import org.springframework.data.domain.PageRequest;
 class ChatRoomRepositoryTest {
     @Autowired
     ChatRoomRepository chatRoomRepository;
-    @Autowired
-    ChatRepository chatRepository;
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -56,16 +53,6 @@ class ChatRoomRepositoryTest {
         new Participant(user, chatRoom1);
         new Participant(user3, chatRoom1);
         chatRoomRepository.save(chatRoom1);
-
-        Chat chat = new Chat("hello", user, chatRoom);
-        Chat chat1 = new Chat("hihi", user2, chatRoom);
-        Chat save = chatRepository.save(chat);
-        chatRepository.save(chat1);
-
-        Chat chat2 = new Chat("ss", user, chatRoom1);
-        Chat chat3 = new Chat("okay", user3, chatRoom1);
-        chatRepository.save(chat2);
-        chatRepository.save(chat3);
 
         ApiResponse<ChatRoomListResponse> tae = controller.findChatRooms(
                 new AuthUser(1L, "tae@email", "tae", UserRole.ROLE_USER),

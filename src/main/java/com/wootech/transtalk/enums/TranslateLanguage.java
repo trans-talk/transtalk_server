@@ -1,19 +1,18 @@
 package com.wootech.transtalk.enums;
 
-import static com.wootech.transtalk.exception.ErrorMessages.NOT_SUPPORTED_LANGUAGE_CODE_ERROR;
-
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.wootech.transtalk.exception.custom.BadRequestException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 import java.util.Arrays;
+
+import static com.wootech.transtalk.exception.ErrorMessages.NOT_SUPPORTED_LANGUAGE_CODE_ERROR;
 
 public enum TranslateLanguage {
     KOREAN("ko"),
     SPANISH("es"),
     JAPANESE("ja"),
-    ENGLISH("en"),
+    ENGLISH("en-us"),
     CHINESE("zh");
     private final String code;
 

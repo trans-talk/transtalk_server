@@ -2,6 +2,7 @@ package com.wootech.transtalk.entity;
 
 import static com.wootech.transtalk.exception.ErrorMessages.DUPLICATE_TRANSLATION_ERROR;
 
+import com.wootech.transtalk.enums.TranslationStatus;
 import com.wootech.transtalk.event.Events;
 import com.wootech.transtalk.event.MessageNotificationEvent;
 import com.wootech.transtalk.exception.custom.ConflictException;
@@ -36,12 +37,14 @@ public class Chat extends TimeStamped {
     @ManyToOne
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
+    private TranslationStatus translationStatus;
 
     public Chat(String originalContent, User sender, ChatRoom chatRoom) {
         this.originalContent = originalContent;
         this.unreadCount = 1;
         this.sender = sender;
         this.chatRoom = chatRoom;
+        this.translationStatus = TranslationStatus.PENDING;
     }
 
     public void completeTranslate(String translatedContent) {

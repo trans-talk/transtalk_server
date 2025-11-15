@@ -62,7 +62,7 @@ class ChatRoomServiceTest {
                 ).containsExactlyInAnyOrder(
                         tuple(
                                 "nice to meet you",
-                                1,
+                                1L,
                                 response.chatRoomId(),
                                 recipient.getName(),
                                 recipient.getPicture(),

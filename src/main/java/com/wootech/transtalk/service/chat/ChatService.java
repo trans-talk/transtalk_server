@@ -38,6 +38,7 @@ public class ChatService {
                 chat.getTranslatedContent(),
                 sender.getEmail(),
                 chat.getCreatedAt(),
-                chat.getUnreadCount());
+                chat.getUnreadCount(),
+                chat.getTranslationStatus());
     }
 }

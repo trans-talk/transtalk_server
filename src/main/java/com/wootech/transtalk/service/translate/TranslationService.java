@@ -11,6 +11,10 @@ public class TranslationService {
     }
 
     public String translate(String text, String targetLanguage) {
-        return translator.translate(text, targetLanguage);
+        try {
+            return translator.translate(text, targetLanguage);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }
