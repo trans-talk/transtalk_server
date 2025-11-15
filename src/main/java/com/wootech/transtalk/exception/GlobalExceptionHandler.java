@@ -2,6 +2,7 @@ package com.wootech.transtalk.exception;
 
 import com.wootech.transtalk.dto.ApiResponse;
 import com.wootech.transtalk.exception.custom.ApplicationException;
+import com.wootech.transtalk.exception.custom.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -16,6 +17,11 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice(basePackages = "com.wootech.transtalk.controller")
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ApiResponse<String> handleJwtTokenExpired(ExpiredJwtException e) {
+        return ApiResponse.error(e.getMessage(), HttpStatus.NOT_ACCEPTABLE.name());
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ApiResponse<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {

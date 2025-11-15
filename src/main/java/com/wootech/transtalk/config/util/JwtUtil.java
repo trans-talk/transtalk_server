@@ -2,11 +2,13 @@ package com.wootech.transtalk.config.util;
 
 import com.wootech.transtalk.enums.UserRole;
 import com.wootech.transtalk.exception.custom.UnauthorizedException;
+import com.wootech.transtalk.exception.custom.ExpiredJwtException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -24,7 +26,7 @@ import static com.wootech.transtalk.exception.ErrorMessages.*;
 public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long ACCESS_TOKEN_TIME = 10 * 60 * 1000L; // 10분
+    private static final long ACCESS_TOKEN_TIME = 10 * 3 * 1000L; // 30초
     public static final int REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60; // 1주일
 
     @Value("${jwt.secret.key}")
@@ -53,8 +55,15 @@ public class JwtUtil {
                         .compact();
     }
 
-    public String createRefreshToken() {
-        return UUID.randomUUID().toString();
+    // 유저 id 값을 갖는 refresh token
+    public String createRefreshToken(String userId) {
+        return Jwts.builder()
+                .setSubject("refresh-token")
+                .claim("userId", userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_TIME))
+                .signWith(key, signatureAlgorithm)
+                .compact();
     }
 
     public String substringToken(String tokenValue) throws ServerException {
@@ -72,7 +81,7 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    // 웹소켓을 위해 추가
+    // 웹소켓에서 사용 - access token 검증
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
@@ -81,7 +90,8 @@ public class JwtUtil {
                     .parseSignedClaims(token);
             return true;
         } catch (ExpiredJwtException e) {
-            log.warn(EXPIRED_JWT_TOKEN_ERROR + ": {}", e.getMessage());
+            log.error(EXPIRED_JWT_TOKEN_ERROR + ": {}", e.getMessage());
+            throw new ExpiredJwtException(EXPIRED_JWT_TOKEN_ERROR, HttpStatus.valueOf(406));
         } catch (UnsupportedJwtException e) {
             log.warn(UNSUPPORTED_JWT_TOKEN_ERROR + ": {}", e.getMessage());
         } catch (MalformedJwtException e) {
@@ -96,20 +106,35 @@ public class JwtUtil {
         return false;
     }
 
+    // 웹소켓에서 사용 - access token 에서 email 추출
     public String getEmail(String token) {
         return extractClaims(token).get("email", String.class);
     }
 
-    public Long getUserId(String token) {
-        return Long.valueOf(extractClaims(token).getSubject());
+    // refresh token 유효성 검증
+    public boolean validateRefreshToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+            log.error(EXPIRED_REFRESH_TOKEN_ERROR + ": {}", e.getMessage());
+            throw new ExpiredJwtException(EXPIRED_REFRESH_TOKEN_ERROR, HttpStatus.valueOf(406));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    public boolean isTokenExpired(String token) {
-        try {
-            Date expiration = extractClaims(token).getExpiration();
-            return expiration.before(new Date());
-        } catch (Exception e) {
-            return true;
-        }
+    // refresh token 에서 userId 값 추출
+    public String extractUserId(String refreshToken) {
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(refreshToken)
+                .getPayload();
+
+        return claims.get("userId", String.class);
     }
 }

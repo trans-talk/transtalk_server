@@ -10,9 +10,7 @@ import static com.wootech.transtalk.config.util.JwtUtil.REFRESH_TOKEN_TIME;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CookieUtil {
 
-    /**
-     * HttpOnly, Secure 옵션을 사용하여 Refresh Token을 쿠키로 저장
-     */
+    // HttpOnly, Secure 옵션을 사용하여 Refresh Token을 쿠키로 저장
     public static void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setMaxAge(REFRESH_TOKEN_TIME);

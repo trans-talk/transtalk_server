@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             } catch (ExpiredJwtException e) {
                 log.error(EXPIRED_JWT_TOKEN_ERROR, e);
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, EXPIRED_JWT_TOKEN_ERROR);
+                response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, EXPIRED_JWT_TOKEN_ERROR);
                 return;
             } catch (UnsupportedJwtException e) {
                 log.error(UNSUPPORTED_JWT_TOKEN_ERROR, e);

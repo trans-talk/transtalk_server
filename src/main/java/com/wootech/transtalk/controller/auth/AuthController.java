@@ -36,18 +36,19 @@ public class AuthController {
     ) {
         AuthSignInResponse authSignInResponse = authService.googleLogin(code);
         addRefreshTokenCookie(httpServletResponse, authSignInResponse.getTokenresponse().getRefreshToken());
+        authSignInResponse.getTokenresponse().removeRefreshToken();
         return ApiResponse.success(authSignInResponse, "인증 요청에 성공했습니다.");
     }
 
     // 토큰 재발급
     @GetMapping("/refresh")
     public ApiResponse<AuthSignInResponse.TokenResponse> refresh(
-            @RequestParam Long userId,
             @RefreshToken String refreshToken,
             HttpServletResponse httpServletResponse
     ) {
-        AuthSignInResponse.TokenResponse tokenResponse = authService.refreshAccessToken(userId, refreshToken);
+        AuthSignInResponse.TokenResponse tokenResponse = authService.refreshAccessToken(refreshToken);
         addRefreshTokenCookie(httpServletResponse, tokenResponse.getRefreshToken());
+        tokenResponse.removeRefreshToken();
         return ApiResponse.success(tokenResponse, "토큰 재발급에 성공했습니다.");
     }
 }

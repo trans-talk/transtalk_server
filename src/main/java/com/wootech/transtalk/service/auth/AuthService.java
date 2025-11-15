@@ -6,16 +6,12 @@ import com.wootech.transtalk.dto.auth.AuthSignInResponse;
 import com.wootech.transtalk.dto.auth.GoogleProfileResponse;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.UserRole;
-import com.wootech.transtalk.exception.custom.UnauthorizedException;
 import com.wootech.transtalk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-
-import static com.wootech.transtalk.exception.ErrorMessages.INVALID_REFRESH_TOKEN_ERROR;
 
 @Slf4j
 @Service
@@ -48,7 +44,7 @@ public class AuthService {
 
         // 토큰 발급
         String accessToken = jwtUtil.createAccessToken(user.getId(), user.getEmail(), user.getName(), user.getUserRole());
-        String refreshToken = jwtUtil.createRefreshToken();
+        String refreshToken = jwtUtil.createRefreshToken(String.valueOf(user.getId()));
 
         refreshTokenService.saveRefreshToken(refreshToken);
 
@@ -68,20 +64,18 @@ public class AuthService {
 
 
     // refresh token 재발급
-    public AuthSignInResponse.TokenResponse refreshAccessToken(Long userId, String refreshToken) {
+    public AuthSignInResponse.TokenResponse refreshAccessToken(String refreshToken) {
         String storedToken = refreshTokenService.getRefreshToken(refreshToken);
 
-        if (storedToken == null || !storedToken.equals(refreshToken)) {
-            throw new UnauthorizedException(INVALID_REFRESH_TOKEN_ERROR, HttpStatusCode.valueOf(401));
-        }
+        jwtUtil.validateToken(storedToken);
 
+        Long userId = Long.parseLong(jwtUtil.extractUserId(refreshToken));
         User foundUser = userService.getUserById(userId);
 
         String accessToken = jwtUtil.createAccessToken(foundUser.getId(), foundUser.getEmail(), foundUser.getName(), foundUser.getUserRole());
 
         return AuthSignInResponse.TokenResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .build();
     }
 }
