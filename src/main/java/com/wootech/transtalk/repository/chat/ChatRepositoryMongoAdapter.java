@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 //@Repository
 @RequiredArgsConstructor
-public class ChatRepositoryMongoImpl implements ChatRepositoryCustom {
+public class ChatRepositoryMongoAdapter implements ChatRepository {
     private final MongoTemplate mongoTemplate;
 
     @Override
@@ -20,6 +20,7 @@ public class ChatRepositoryMongoImpl implements ChatRepositoryCustom {
 
     /**
      * 채팅방 id로 마지막 채팅을 찾는 메서드입니다.
+     *
      * @param chatRoomId
      * @return
      */
@@ -30,6 +31,7 @@ public class ChatRepositoryMongoImpl implements ChatRepositoryCustom {
 
     /**
      * 채팅방 id와 상대방 id로 마지막 메세지를 찾는 메서드입니다.
+     *
      * @param senderId
      * @param chatRoomId
      * @return

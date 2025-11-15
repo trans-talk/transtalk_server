@@ -2,16 +2,15 @@ package com.wootech.transtalk.repository.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.entity.Chat;
-import com.wootech.transtalk.repository.ChatRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class ChatRepositoryJpaImpl implements ChatRepositoryCustom {
+public class ChatRepositoryJpaAdapter implements ChatRepository {
 
-    private final ChatRepository jpaRepository;
+    private final ChatJpaRepository jpaRepository;
     @Override
     public ChatMessage save(ChatMessage chatMessage) {
         Chat chat = Chat.fromDomain(chatMessage);

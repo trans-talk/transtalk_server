@@ -3,7 +3,7 @@ package com.wootech.transtalk.repository.chat;
 import com.wootech.transtalk.domain.ChatMessage;
 import java.util.Optional;
 
-public interface ChatRepositoryCustom {
+public interface ChatRepository {
     ChatMessage save(ChatMessage chatMessage);
 
     Optional<ChatMessage> findLastByChatRoomIdOrderByCreatedAtDesc(Long chatRoomId);
