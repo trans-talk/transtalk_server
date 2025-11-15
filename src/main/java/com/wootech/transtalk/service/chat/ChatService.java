@@ -25,7 +25,7 @@ public class ChatService {
         User sender = userService.getUserByEmail(senderEmail);
         ChatRoom findChatRoom = chatRoomService.findById(chatRoomId);
 
-        Chat chat = new Chat(message, sender, findChatRoom);
+        Chat chat = new Chat(message, sender.getId(), findChatRoom.getId());
         chatRepository.save(chat);
 
         //TODO 성능에 문제가 있다면 비동기로 변경한다.

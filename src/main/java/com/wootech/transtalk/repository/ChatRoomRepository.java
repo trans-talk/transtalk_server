@@ -18,7 +18,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom,Long> {
             ORDER BY(
             SELECT MAX(c.createdAt)
             FROM Chat c
-            WHERE c.chatRoom.id = cr.id
+            WHERE c.chatRoomId = cr.id
             ) DESC 
             """)
     Page<ChatRoom> findByParticipantsUserId(@Param("userId") Long userId, Pageable pageable);
