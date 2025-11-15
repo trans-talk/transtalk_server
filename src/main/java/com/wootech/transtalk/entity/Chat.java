@@ -48,13 +48,18 @@ public class Chat extends TimeStamped {
     }
 
     public void completeTranslate(String translatedContent) {
-        validDuplicateTranslation();
+        completeTranslate();
         this.translatedContent = translatedContent;
         Events.raise(new MessageNotificationEvent(chatRoom.getId(), sender.getId()));
     }
 
+    private void completeTranslate() {
+        validDuplicateTranslation();
+        this.translationStatus = TranslationStatus.COMPLETED;
+    }
+
     private void validDuplicateTranslation() {
-        if (this.translatedContent != null) {
+        if (this.translationStatus != TranslationStatus.PENDING) {
             throw new ConflictException(DUPLICATE_TRANSLATION_ERROR, HttpStatusCode.valueOf(409));
         }
     }
