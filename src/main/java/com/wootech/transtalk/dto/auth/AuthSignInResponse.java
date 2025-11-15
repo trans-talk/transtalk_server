@@ -31,5 +31,9 @@ public class AuthSignInResponse {
     public static class TokenResponse {
         private String accessToken;
         private String refreshToken;
+
+        public void removeRefreshToken() {
+            this.refreshToken = null;
+        }
     }
 }
