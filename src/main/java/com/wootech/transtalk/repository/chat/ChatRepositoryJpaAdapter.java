@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -48,8 +50,10 @@ public class ChatRepositoryJpaAdapter implements ChatRepository {
     }
 
     @Override
-    public List<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId) {
-        return null;
+    public Page<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable) {
+        Page<Chat> chatPage = jpaRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId, pageable);
+
+        return chatPage.map(chat -> chat.toDomain());
     }
 
 

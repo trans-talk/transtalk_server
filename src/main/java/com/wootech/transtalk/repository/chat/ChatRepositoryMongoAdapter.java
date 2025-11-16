@@ -8,6 +8,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -84,8 +86,9 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
     }
 
     @Override
-    public List<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId) {
+    public Page<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable) {
         return null;
     }
+
 
 }

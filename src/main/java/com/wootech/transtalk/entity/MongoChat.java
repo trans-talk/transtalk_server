@@ -22,6 +22,7 @@ public class MongoChat {
     private int unReadCount = 1;
     private Long chatroomId;
     private Long senderId;
+    private String senderEmail;
     private LocalDateTime sendAt = LocalDateTime.now();
 
     public static MongoChat fromDomain(ChatMessage chatMessage) {
@@ -30,6 +31,7 @@ public class MongoChat {
                 .translatedContent(null) // 비동기 처리
                 .translationStatus(TranslationStatus.PENDING) // 대기 상태
                 .senderId(chatMessage.getSenderId())
+                .senderEmail(chatMessage.getSenderEmail())
                 .chatroomId(chatMessage.getChatRoomId())
                 .sendAt(LocalDateTime.now())
                 .build();
@@ -41,6 +43,7 @@ public class MongoChat {
                 this.translatedContent,
                 this.chatroomId,
                 this.senderId,
+                this.senderEmail,
                 this.unReadCount,
                 this.sendAt,
                 this.translationStatus

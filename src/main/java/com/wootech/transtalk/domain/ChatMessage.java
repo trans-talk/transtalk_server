@@ -15,17 +15,19 @@ public class ChatMessage {
     private String translatedContent;
     private Long chatRoomId;
     private Long senderId;
+    private String senderEmail;
     private int unReadCount;
     private LocalDateTime createdAt;
     private TranslationStatus translationStatus;
 
-    public ChatMessage(String id, String originalContent, String translatedContent, Long chatRoomId, Long senderId,
+    public ChatMessage(String id, String originalContent, String translatedContent, Long chatRoomId, Long senderId, String senderEmail,
                        int unReadCount, LocalDateTime createdAt, TranslationStatus translationStatus) {
         this.id = id;
         this.originalContent = originalContent;
         this.translatedContent = translatedContent;
         this.chatRoomId = chatRoomId;
         this.senderId = senderId;
+        this.senderEmail = senderEmail;
         this.unReadCount = unReadCount;
         this.createdAt = createdAt;
         this.translationStatus = translationStatus;
@@ -49,6 +51,10 @@ public class ChatMessage {
 
     public Long getSenderId() {
         return senderId;
+    }
+
+    public String getSenderEmail() {
+        return senderEmail;
     }
 
     public int getUnReadCount() {

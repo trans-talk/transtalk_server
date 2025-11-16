@@ -2,7 +2,10 @@ package com.wootech.transtalk.service.chat;
 
 
 import com.wootech.transtalk.domain.ChatMessage;
+import com.wootech.transtalk.dto.ChatMessageListResponse;
+import com.wootech.transtalk.dto.ChatMessageRequest;
 import com.wootech.transtalk.dto.ChatMessageResponse;
+import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslationStatus;
@@ -12,7 +15,11 @@ import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import com.wootech.transtalk.service.translate.TranslationService;
 import com.wootech.transtalk.service.user.UserService;
 import java.time.ZoneId;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +43,7 @@ public class ChatService {
                 null,
                 chatRoomId,
                 sender.getId(),
+                senderEmail,
                 1,
                 null,
                 TranslationStatus.PENDING
@@ -49,8 +57,8 @@ public class ChatService {
                 savedChat.getOriginalContent(),
                 savedChat.getTranslatedContent(),
                 sender.getEmail(),
-                savedChat.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant(),
-                0,
+                savedChat.getCreatedAt(),
+                savedChat.getUnReadCount(),
                 savedChat.getTranslationStatus());
     }
 
@@ -67,7 +75,7 @@ public class ChatService {
                         translatedChat.getOriginalContent(),
                         translatedChat.getTranslatedContent(),
                         senderEmail,
-                        translatedChat.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant(),
+                        translatedChat.getCreatedAt(),
                         0,
                         translatedChat.getTranslationStatus()
                 ));
@@ -80,9 +88,16 @@ public class ChatService {
         return chatRepository.updateTranslation(chat);
     }
 
-    public void getChats() {
+    @Transactional
+    public ChatMessageListResponse getChats(AuthUser authUser, Long chatRoomId, Pageable pageable) {
+        //사용자 검증 해야함
 
-        //DTO로 반환
+        Page<ChatMessage> findChat = chatRepository.findAllByChatRoomIdOrderByCreatedAt(
+                chatRoomId, pageable);
+
+        Page<ChatMessageResponse> responses = findChat.map(ChatMessageResponse::from);
+
+        return ChatMessageListResponse.from(responses);
     }
 
 }
