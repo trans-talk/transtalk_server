@@ -49,9 +49,8 @@ public class MongoChatService {
             String translatedContent = translationService.translate(chat.getOriginalContent(), targetLangCode);
             log.info("[ChatService] Translated Content: {}", translatedContent);
 
-            ChatMessage translatedChat = chatRepositoryMongoAdapter.updateTranslation(chat.getChatRoomId(),
-                            translatedContent, TranslationStatus.COMPLETED)
-                    .orElseThrow(() -> new NotFoundException(CHAT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
+            chat.completeTranslate(translatedContent);
+            ChatMessage translatedChat = chatRepositoryMongoAdapter.updateTranslation(chat);
 
             // 클라이언트에 메세지 전송 - 번역 완료된 메세지, 상태
             messagingTemplate.convertAndSend(
@@ -88,7 +87,7 @@ public class MongoChatService {
                 null,
                 chatRoomId,
                 sender.getId(),
-                false,
+                1,
                 LocalDateTime.now(),
                 TranslationStatus.PENDING
         );

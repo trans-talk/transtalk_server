@@ -1,7 +1,13 @@
 package com.wootech.transtalk.domain;
 
+import static com.wootech.transtalk.exception.ErrorMessages.DUPLICATE_TRANSLATION_ERROR;
+
 import com.wootech.transtalk.enums.TranslationStatus;
+import com.wootech.transtalk.event.Events;
+import com.wootech.transtalk.event.MessageNotificationEvent;
+import com.wootech.transtalk.exception.custom.ConflictException;
 import java.time.LocalDateTime;
+import org.springframework.http.HttpStatusCode;
 
 public class ChatMessage {
     private String id;
@@ -9,18 +15,18 @@ public class ChatMessage {
     private String translatedContent;
     private Long chatRoomId;
     private Long senderId;
-    private boolean read;
+    private int unReadCount;
     private LocalDateTime createdAt;
     private TranslationStatus translationStatus;
 
     public ChatMessage(String id, String originalContent, String translatedContent, Long chatRoomId, Long senderId,
-                       boolean read, LocalDateTime createdAt, TranslationStatus translationStatus) {
+                       int unReadCount, LocalDateTime createdAt, TranslationStatus translationStatus) {
         this.id = id;
         this.originalContent = originalContent;
         this.translatedContent = translatedContent;
         this.chatRoomId = chatRoomId;
         this.senderId = senderId;
-        this.read = read;
+        this.unReadCount = unReadCount;
         this.createdAt = createdAt;
         this.translationStatus = translationStatus;
     }
@@ -45,8 +51,8 @@ public class ChatMessage {
         return senderId;
     }
 
-    public boolean isRead() {
-        return read;
+    public int getUnReadCount() {
+        return unReadCount;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -55,5 +61,20 @@ public class ChatMessage {
 
     public TranslationStatus getTranslationStatus() {
         return translationStatus;
+    }
+
+    public void completeTranslate(String translatedContent) {
+        completeTranslate();
+        this.translatedContent = translatedContent;
+        Events.raise(new MessageNotificationEvent(chatRoomId, senderId));
+    }
+    private void completeTranslate() {
+        validDuplicateTranslation();
+        this.translationStatus = TranslationStatus.COMPLETED;
+    }
+    private void validDuplicateTranslation() {
+        if (this.translationStatus != TranslationStatus.PENDING) {
+            throw new ConflictException(DUPLICATE_TRANSLATION_ERROR, HttpStatusCode.valueOf(409));
+        }
     }
 }

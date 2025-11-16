@@ -47,24 +47,5 @@ public class ChatController {
 //        return chatService.getChats(authUser, chatRoomId, size);
     }
 
-    @GetMapping("/api/v1/chatrooms/{chatRoomId}/last")
-    public Chat getLastMessage(@AuthenticationPrincipal AuthUser authUser,
-                               @PathVariable Long chatRoomId
-    ) {
-        // 사용자 검증
-        userService.getUserById(authUser.getUserId());
-        return null;
-//        return chatService.findLastChat(chatRoomId);
-    }
-
-    @GetMapping("/api/v1/chatrooms/{chatRoomId}/unread")
-    public long getUnreadCount(@AuthenticationPrincipal AuthUser authUser,
-                               @PathVariable Long chatRoomId
-
-    ) {
-        userService.getUserById(authUser.getUserId());
-        return 0;
-//        return chatService.countUnreadChats(chatRoomId);
-    }
 
 }

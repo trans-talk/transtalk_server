@@ -19,7 +19,7 @@ public class MongoChat {
     private String originalContent;
     private TranslationStatus translationStatus;
     private String translatedContent;
-    private boolean read = false;
+    private int unReadCount = 1;
     private Long chatroomId;
     private Long senderId;
     private LocalDateTime sendAt = LocalDateTime.now();
@@ -41,7 +41,7 @@ public class MongoChat {
                 this.translatedContent,
                 this.chatroomId,
                 this.senderId,
-                this.read,
+                this.unReadCount,
                 this.sendAt,
                 this.translationStatus
         );

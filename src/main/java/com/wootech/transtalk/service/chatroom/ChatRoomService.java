@@ -52,7 +52,7 @@ public class ChatRoomService {
         return chatRooms.map(chatRoom -> convertToChatRoomResponse(currentUserId, chatRoom));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ChatRoomResponse updateChatRoomInfo(Long chatRoomId, Long currentUserId) {
         ChatRoom findChatRoom = findById(chatRoomId);
 
@@ -68,7 +68,8 @@ public class ChatRoomService {
                 });
     }
 
-    private ChatRoomResponse convertToChatRoomResponse(Long currentUserId, ChatRoom chatRoom) {
+    @Transactional
+    public ChatRoomResponse convertToChatRoomResponse(Long currentUserId, ChatRoom chatRoom) {
         User recipient = chatRoom.getRecipient(currentUserId);
         Chat lastChat = chatJpaRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
         long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);

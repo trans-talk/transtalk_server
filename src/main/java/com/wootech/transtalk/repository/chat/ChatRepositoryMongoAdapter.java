@@ -3,6 +3,7 @@ package com.wootech.transtalk.repository.chat;
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.entity.MongoChat;
 import com.wootech.transtalk.enums.TranslationStatus;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,12 +59,12 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
     }
 
     @Override
-    public Optional<ChatMessage> updateTranslation(Long chatId, String translatedContent, TranslationStatus status) {
-        String chatMongoId = chatId.toString();
+    public ChatMessage updateTranslation(ChatMessage changeChat) {
+        String chatMongoId = changeChat.getId();
         // 업데이트 쿼리
         Update update = new Update()
-                .set("translatedContent", translatedContent)
-                .set("translationStatus", status);
+                .set("translatedContent", changeChat.getTranslatedContent())
+                .set("translationStatus", changeChat.getTranslationStatus());
         Query query = new Query(Criteria.where("_id").is(new ObjectId(chatMongoId)));
 
         MongoChat updateChat = mongoTemplate.findAndModify(
@@ -72,7 +73,7 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
                 FindAndModifyOptions.options().returnNew(true),
                 MongoChat.class);
 
-        return Optional.ofNullable(updateChat).map(MongoChat::toDomain);
+        return updateChat.toDomain();
     }
 
     @Override
@@ -80,6 +81,11 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
         String chatMongoId = String.valueOf(chatId);
         MongoChat chat = mongoTemplate.findById(chatMongoId, MongoChat.class);
         return Optional.of(chat.toDomain());
+    }
+
+    @Override
+    public List<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId) {
+        return null;
     }
 
 }

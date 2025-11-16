@@ -1,25 +1,18 @@
 package com.wootech.transtalk.entity;
 
-import static com.wootech.transtalk.exception.ErrorMessages.DUPLICATE_TRANSLATION_ERROR;
 
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.enums.TranslationStatus;
-import com.wootech.transtalk.event.Events;
-import com.wootech.transtalk.event.MessageNotificationEvent;
-import com.wootech.transtalk.exception.custom.ConflictException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatusCode;
 
 @Getter
 @Entity
@@ -48,22 +41,11 @@ public class Chat extends TimeStamped {
         this.translationStatus = TranslationStatus.PENDING;
     }
 
-    public void completeTranslate(String translatedContent) {
-        completeTranslate();
-        this.translatedContent = translatedContent;
-        Events.raise(new MessageNotificationEvent(chatRoomId, senderId));
+    public void applyDomain(ChatMessage chatMessage) {
+        this.translatedContent = chatMessage.getTranslatedContent();
+        this.translationStatus = chatMessage.getTranslationStatus();
     }
 
-    private void completeTranslate() {
-        validDuplicateTranslation();
-        this.translationStatus = TranslationStatus.COMPLETED;
-    }
-
-    private void validDuplicateTranslation() {
-        if (this.translationStatus != TranslationStatus.PENDING) {
-            throw new ConflictException(DUPLICATE_TRANSLATION_ERROR, HttpStatusCode.valueOf(409));
-        }
-    }
 
     public static Chat fromDomain(ChatMessage chatMessage) {
         Chat entity = new Chat(
@@ -82,7 +64,7 @@ public class Chat extends TimeStamped {
                 this.getTranslatedContent(),
                 this.chatRoomId,
                 this.senderId,
-                false,
+                this.unreadCount,
                 LocalDateTime.ofInstant(this.getCreatedAt(), ZoneId.of("Asia/Seoul")),
                 this.translationStatus
         );
