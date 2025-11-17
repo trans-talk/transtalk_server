@@ -5,6 +5,7 @@ import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.dto.chat.ChatMessageListResponse;
 import com.wootech.transtalk.dto.chat.ChatMessageResponse;
 import com.wootech.transtalk.dto.auth.AuthUser;
+import com.wootech.transtalk.dto.chat.RecipientInfoRequest;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslationStatus;
@@ -86,13 +87,18 @@ public class ChatService {
     @Transactional
     public ChatMessageListResponse getChats(AuthUser authUser, Long chatRoomId, Pageable pageable) {
         //사용자 검증 해야함
+        ChatRoom chatRoom = chatRoomService.findById(chatRoomId);
+        User recipient = chatRoom.getRecipient(authUser.getUserId());
 
         Page<ChatMessage> findChat = chatRepository.findAllByChatRoomIdOrderByCreatedAt(
                 chatRoomId, pageable);
 
         Page<ChatMessageResponse> responses = findChat.map(ChatMessageResponse::from);
 
-        return ChatMessageListResponse.from(responses);
+        RecipientInfoRequest recipientInfo = new RecipientInfoRequest(recipient.getPicture(), recipient.getEmail(),
+                recipient.getName());
+
+        return ChatMessageListResponse.from(responses, recipientInfo);
     }
 
 }
