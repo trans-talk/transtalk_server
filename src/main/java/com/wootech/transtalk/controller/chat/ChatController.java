@@ -1,5 +1,7 @@
 package com.wootech.transtalk.controller.chat;
 
+import com.wootech.transtalk.dto.ApiResponse;
+import com.wootech.transtalk.dto.ChatMessageListResponse;
 import com.wootech.transtalk.dto.ChatMessageRequest;
 import com.wootech.transtalk.dto.ChatMessageResponse;
 import com.wootech.transtalk.dto.auth.AuthUser;
@@ -8,6 +10,8 @@ import com.wootech.transtalk.service.chat.ChatService;
 import com.wootech.transtalk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -37,34 +41,15 @@ public class ChatController {
         return chatService.save(chatMessageRequest.content(), chatRoomId, principal.getName());
     }
 
-    @GetMapping("/api/v1/chatrooms/{chatRoomId}/chats")
-    public List<Chat> getChats(
+    @GetMapping("/api/v1/chatRooms/{chatRoomId}/chats")
+    public ApiResponse<ChatMessageListResponse> getChats(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long chatRoomId,
-            @RequestParam(defaultValue = "40") int size
+            @PageableDefault(size = 40) Pageable pageable
     ) {
-        return null;
-//        return chatService.getChats(authUser, chatRoomId, size);
+        ChatMessageListResponse chats = chatService.getChats(authUser, chatRoomId, pageable);
+        return ApiResponse.success(chats);
     }
 
-    @GetMapping("/api/v1/chatrooms/{chatRoomId}/last")
-    public Chat getLastMessage(@AuthenticationPrincipal AuthUser authUser,
-                               @PathVariable Long chatRoomId
-    ) {
-        // 사용자 검증
-        userService.getUserById(authUser.getUserId());
-        return null;
-//        return chatService.findLastChat(chatRoomId);
-    }
-
-    @GetMapping("/api/v1/chatrooms/{chatRoomId}/unread")
-    public long getUnreadCount(@AuthenticationPrincipal AuthUser authUser,
-                               @PathVariable Long chatRoomId
-
-    ) {
-        userService.getUserById(authUser.getUserId());
-        return 0;
-//        return chatService.countUnreadChats(chatRoomId);
-    }
 
 }

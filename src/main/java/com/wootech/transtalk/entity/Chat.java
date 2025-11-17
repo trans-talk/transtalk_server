@@ -1,22 +1,18 @@
 package com.wootech.transtalk.entity;
 
-import static com.wootech.transtalk.exception.ErrorMessages.DUPLICATE_TRANSLATION_ERROR;
 
+import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.enums.TranslationStatus;
-import com.wootech.transtalk.event.Events;
-import com.wootech.transtalk.event.MessageNotificationEvent;
-import com.wootech.transtalk.exception.custom.ConflictException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatusCode;
 
 @Getter
 @Entity
@@ -31,31 +27,51 @@ public class Chat extends TimeStamped {
     private String translatedContent;
     @Column(nullable = false)
     private int unreadCount;
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User sender;
-    @ManyToOne
-    @JoinColumn(name = "chat_room_id")
-    private ChatRoom chatRoom;
+    @Column(nullable = false)
+    private Long senderId;
+    @Column(nullable = false)
+    private Long chatRoomId;
     private TranslationStatus translationStatus;
+    @Column(nullable = false)
+    private String senderEmail;
 
-    public Chat(String originalContent, User sender, ChatRoom chatRoom) {
+    public Chat(String originalContent, Long senderId, String senderEmail,Long chatRoomId) {
         this.originalContent = originalContent;
         this.unreadCount = 1;
-        this.sender = sender;
-        this.chatRoom = chatRoom;
+        this.senderId = senderId;
+        this.senderEmail = senderEmail;
+        this.chatRoomId = chatRoomId;
         this.translationStatus = TranslationStatus.PENDING;
     }
 
-    public void completeTranslate(String translatedContent) {
-        validDuplicateTranslation();
-        this.translatedContent = translatedContent;
-        Events.raise(new MessageNotificationEvent(chatRoom.getId(), sender.getId()));
+    public void applyDomain(ChatMessage chatMessage) {
+        this.translatedContent = chatMessage.getTranslatedContent();
+        this.translationStatus = chatMessage.getTranslationStatus();
     }
 
-    private void validDuplicateTranslation() {
-        if (this.translatedContent != null) {
-            throw new ConflictException(DUPLICATE_TRANSLATION_ERROR, HttpStatusCode.valueOf(409));
-        }
+
+    public static Chat fromDomain(ChatMessage chatMessage) {
+        Chat entity = new Chat(
+                chatMessage.getOriginalContent(),
+                chatMessage.getSenderId(),
+                chatMessage.getSenderEmail(),
+                chatMessage.getChatRoomId()
+                );
+
+        return entity;
+    }
+
+    public ChatMessage toDomain() {
+        return new ChatMessage(
+                String.valueOf(this.id),
+                this.getOriginalContent(),
+                this.getTranslatedContent(),
+                this.chatRoomId,
+                this.senderId,
+                this.senderEmail,
+                this.unreadCount,
+                LocalDateTime.ofInstant(this.getCreatedAt(), ZoneId.of("Asia/Seoul")),
+                this.translationStatus
+        );
     }
 }

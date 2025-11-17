@@ -40,5 +40,8 @@ public final class ErrorMessages {
 
     // TranslateLanguage
     public static final String NOT_SUPPORTED_LANGUAGE_CODE_ERROR = "지원하지 않는 언어 코드입니다.";
-    public static final String DUPLICATE_TRANSLATION_ERROR = "이미 번역된이 완료된 메세지 입니다.";
+    public static final String DUPLICATE_TRANSLATION_ERROR = "이미 번역이 완료된 메세지 입니다.";
+
+    //Chat
+    public static final String CHAT_NOT_FOUND_ERROR = "채팅 조회에 실패했습니다.";
 }

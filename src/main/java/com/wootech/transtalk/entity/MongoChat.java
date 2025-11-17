@@ -1,5 +1,6 @@
 package com.wootech.transtalk.entity;
 
+import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.enums.TranslationStatus;
 import jakarta.persistence.Id;
 import lombok.*;
@@ -18,8 +19,34 @@ public class MongoChat {
     private String originalContent;
     private TranslationStatus translationStatus;
     private String translatedContent;
-    private boolean read = false;
+    private int unReadCount = 1;
     private Long chatroomId;
     private Long senderId;
+    private String senderEmail;
     private LocalDateTime sendAt = LocalDateTime.now();
+
+    public static MongoChat fromDomain(ChatMessage chatMessage) {
+        return MongoChat.builder()
+                .originalContent(chatMessage.getOriginalContent())
+                .translatedContent(null) // 비동기 처리
+                .translationStatus(TranslationStatus.PENDING) // 대기 상태
+                .senderId(chatMessage.getSenderId())
+                .senderEmail(chatMessage.getSenderEmail())
+                .chatroomId(chatMessage.getChatRoomId())
+                .sendAt(LocalDateTime.now())
+                .build();
+    }
+    public ChatMessage toDomain() {
+        return new ChatMessage(
+                this.id,
+                this.originalContent,
+                this.translatedContent,
+                this.chatroomId,
+                this.senderId,
+                this.senderEmail,
+                this.unReadCount,
+                this.sendAt,
+                this.translationStatus
+        );
+    }
 }

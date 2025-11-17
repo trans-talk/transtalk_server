@@ -10,7 +10,7 @@ import com.wootech.transtalk.entity.Participant;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.exception.custom.NotFoundException;
-import com.wootech.transtalk.repository.ChatRepository;
+import com.wootech.transtalk.repository.chat.ChatJpaRepository;
 import com.wootech.transtalk.repository.ChatRoomRepository;
 import com.wootech.transtalk.service.user.UserService;
 import java.util.Optional;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserService userService;
-    private final ChatRepository chatRepository;
+    private final ChatJpaRepository chatJpaRepository;
 
     @Transactional
     public CreateChatRoomResponse save(TranslateLanguage language, String senderEmail, String recipientEmail) {
@@ -52,7 +52,7 @@ public class ChatRoomService {
         return chatRooms.map(chatRoom -> convertToChatRoomResponse(currentUserId, chatRoom));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ChatRoomResponse updateChatRoomInfo(Long chatRoomId, Long currentUserId) {
         ChatRoom findChatRoom = findById(chatRoomId);
 
@@ -68,9 +68,10 @@ public class ChatRoomService {
                 });
     }
 
-    private ChatRoomResponse convertToChatRoomResponse(Long currentUserId, ChatRoom chatRoom) {
+    @Transactional
+    public ChatRoomResponse convertToChatRoomResponse(Long currentUserId, ChatRoom chatRoom) {
         User recipient = chatRoom.getRecipient(currentUserId);
-        Chat lastChat = chatRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
+        Chat lastChat = chatJpaRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
         long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
 
         return new ChatRoomResponse(
@@ -90,7 +91,7 @@ public class ChatRoomService {
         User currentUser = userService.getUserByEmail(userEamil);
         User recipient = chatRoom.getRecipient(currentUser.getId());
 
-        Optional<Chat> lastRecipientChat = chatRepository.findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(
+        Optional<Chat> lastRecipientChat = chatJpaRepository.findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(
                 recipient.getId(),
                 chatRoomId);
         lastRecipientChat.ifPresent(chat -> chatRoom.exit(currentUser.getId(), chat.getId()));
