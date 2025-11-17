@@ -16,19 +16,19 @@ public class ChatMessage {
     private Long chatRoomId;
     private Long senderId;
     private String senderEmail;
-    private int unReadCount;
+    private boolean isRead;
     private LocalDateTime createdAt;
     private TranslationStatus translationStatus;
 
     public ChatMessage(String id, String originalContent, String translatedContent, Long chatRoomId, Long senderId, String senderEmail,
-                       int unReadCount, LocalDateTime createdAt, TranslationStatus translationStatus) {
+                       boolean isRead, LocalDateTime createdAt, TranslationStatus translationStatus) {
         this.id = id;
         this.originalContent = originalContent;
         this.translatedContent = translatedContent;
         this.chatRoomId = chatRoomId;
         this.senderId = senderId;
         this.senderEmail = senderEmail;
-        this.unReadCount = unReadCount;
+        this.isRead = isRead;
         this.createdAt = createdAt;
         this.translationStatus = translationStatus;
     }
@@ -57,8 +57,8 @@ public class ChatMessage {
         return senderEmail;
     }
 
-    public int getUnReadCount() {
-        return unReadCount;
+    public boolean isRead() {
+        return isRead;
     }
 
     public LocalDateTime getCreatedAt() {

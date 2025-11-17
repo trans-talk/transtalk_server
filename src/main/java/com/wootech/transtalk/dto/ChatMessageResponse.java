@@ -6,7 +6,7 @@ import com.wootech.transtalk.enums.TranslationStatus;
 import java.time.LocalDateTime;
 
 public record ChatMessageResponse(Long chatId, String originalMessage, String translatedMessage,
-                                  String senderEmail, LocalDateTime sendAt, int unReadCount, TranslationStatus status) {
+                                  String senderEmail, LocalDateTime sendAt, boolean isRead, TranslationStatus status) {
     public static ChatMessageResponse from(ChatMessage message) {
         return new ChatMessageResponse(
                 Long.valueOf(message.getId()),
@@ -14,7 +14,7 @@ public record ChatMessageResponse(Long chatId, String originalMessage, String tr
                 message.getTranslatedContent(),
                 message.getSenderEmail(),
                 message.getCreatedAt(),
-                message.getUnReadCount(),
+                message.isRead(),
                 message.getTranslationStatus()
         );
     }

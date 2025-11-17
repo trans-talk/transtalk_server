@@ -61,7 +61,7 @@ public class MongoChatService {
                             translatedChat.getTranslatedContent(),
                             senderEmail,
                             translatedChat.getCreatedAt(),
-                            0,
+                            translatedChat.isRead(),
                             translatedChat.getTranslationStatus()
                     )
             );
@@ -88,7 +88,7 @@ public class MongoChatService {
                 chatRoomId,
                 sender.getId(),
                 senderEmail,
-                1,
+                false,
                 LocalDateTime.now(),
                 TranslationStatus.PENDING
         );
@@ -106,7 +106,7 @@ public class MongoChatService {
                 savedChat.getTranslatedContent(),
                 senderEmail,
                 savedChat.getCreatedAt(),
-                0,
+                savedChat.isRead(),
                 savedChat.getTranslationStatus()
         );
     }

@@ -44,7 +44,7 @@ public class ChatService {
                 chatRoomId,
                 sender.getId(),
                 senderEmail,
-                1,
+                false,
                 null,
                 TranslationStatus.PENDING
         );
@@ -58,7 +58,7 @@ public class ChatService {
                 savedChat.getTranslatedContent(),
                 sender.getEmail(),
                 savedChat.getCreatedAt(),
-                savedChat.getUnReadCount(),
+                savedChat.isRead(),
                 savedChat.getTranslationStatus());
     }
 
@@ -76,7 +76,7 @@ public class ChatService {
                         translatedChat.getTranslatedContent(),
                         senderEmail,
                         translatedChat.getCreatedAt(),
-                        0,
+                        translatedChat.isRead(),
                         translatedChat.getTranslationStatus()
                 ));
     }
