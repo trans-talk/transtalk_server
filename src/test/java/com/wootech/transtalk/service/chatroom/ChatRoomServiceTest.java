@@ -3,7 +3,6 @@ package com.wootech.transtalk.service.chatroom;
 
 import static org.assertj.core.groups.Tuple.tuple;
 
-import com.wootech.transtalk.dto.ChatMessageRequest;
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
 import com.wootech.transtalk.entity.User;

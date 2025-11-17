@@ -1,11 +1,10 @@
 package com.wootech.transtalk.controller.chat;
 
 import com.wootech.transtalk.dto.ApiResponse;
-import com.wootech.transtalk.dto.ChatMessageListResponse;
-import com.wootech.transtalk.dto.ChatMessageRequest;
-import com.wootech.transtalk.dto.ChatMessageResponse;
+import com.wootech.transtalk.dto.chat.ChatMessageListResponse;
+import com.wootech.transtalk.dto.chat.ChatMessageRequest;
+import com.wootech.transtalk.dto.chat.ChatMessageResponse;
 import com.wootech.transtalk.dto.auth.AuthUser;
-import com.wootech.transtalk.entity.Chat;
 import com.wootech.transtalk.service.chat.ChatService;
 import com.wootech.transtalk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +17,9 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
-import java.util.List;
 
 @Slf4j
 @RestController

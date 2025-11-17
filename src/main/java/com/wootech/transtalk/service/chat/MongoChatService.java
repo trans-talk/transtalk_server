@@ -1,34 +1,21 @@
 package com.wootech.transtalk.service.chat;
 
-import static com.wootech.transtalk.exception.ErrorMessages.CHAT_NOT_FOUND_ERROR;
-import static com.wootech.transtalk.exception.ErrorMessages.CHAT_ROOM_NOT_FOUND_ERROR;
-
-import com.mongodb.client.result.UpdateResult;
 import com.wootech.transtalk.domain.ChatMessage;
-import com.wootech.transtalk.dto.ChatMessageRequest;
-import com.wootech.transtalk.dto.ChatMessageResponse;
+import com.wootech.transtalk.dto.chat.ChatMessageRequest;
+import com.wootech.transtalk.dto.chat.ChatMessageResponse;
 import com.wootech.transtalk.entity.ChatRoom;
-import com.wootech.transtalk.entity.MongoChat;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslationStatus;
-import com.wootech.transtalk.exception.custom.NotFoundException;
-import com.wootech.transtalk.repository.ChatRoomRepository;
 import com.wootech.transtalk.repository.chat.ChatRepositoryMongoAdapter;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import com.wootech.transtalk.service.translate.TranslationService;
 import com.wootech.transtalk.service.user.UserService;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.types.ObjectId;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -61,7 +48,7 @@ public class MongoChatService {
                             translatedChat.getTranslatedContent(),
                             senderEmail,
                             translatedChat.getCreatedAt(),
-                            0,
+                            translatedChat.isRead(),
                             translatedChat.getTranslationStatus()
                     )
             );
@@ -88,7 +75,7 @@ public class MongoChatService {
                 chatRoomId,
                 sender.getId(),
                 senderEmail,
-                1,
+                false,
                 LocalDateTime.now(),
                 TranslationStatus.PENDING
         );
@@ -106,7 +93,7 @@ public class MongoChatService {
                 savedChat.getTranslatedContent(),
                 senderEmail,
                 savedChat.getCreatedAt(),
-                0,
+                savedChat.isRead(),
                 savedChat.getTranslationStatus()
         );
     }
