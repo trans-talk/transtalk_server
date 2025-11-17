@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -53,8 +54,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             } catch (ExpiredJwtException e) {
                 log.error(EXPIRED_JWT_TOKEN_ERROR, e);
-                response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, EXPIRED_JWT_TOKEN_ERROR);
-                return;
+                request.setAttribute("exception", e);
+                throw new AuthenticationException(EXPIRED_JWT_TOKEN_ERROR) {};
             } catch (UnsupportedJwtException e) {
                 log.error(UNSUPPORTED_JWT_TOKEN_ERROR, e);
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, UNSUPPORTED_JWT_TOKEN_ERROR);

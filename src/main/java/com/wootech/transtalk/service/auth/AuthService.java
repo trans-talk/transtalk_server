@@ -76,6 +76,7 @@ public class AuthService {
 
         return AuthSignInResponse.TokenResponse.builder()
                 .accessToken(accessToken)
+                .refreshToken(storedToken)
                 .build();
     }
 }
