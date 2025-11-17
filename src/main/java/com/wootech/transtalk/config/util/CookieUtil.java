@@ -18,6 +18,14 @@ public class CookieUtil {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
 
-        response.addCookie(cookie);
+        // sames site = none 값
+        String cookieValue = String.format(
+                "%s=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
+                cookie.getName(),
+                cookie.getValue(),
+                cookie.getMaxAge()
+        );
+
+        response.addHeader("Set-Cookie", cookieValue);
     }
 }

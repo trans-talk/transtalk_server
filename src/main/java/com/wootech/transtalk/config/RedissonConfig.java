@@ -12,13 +12,15 @@ public class RedissonConfig {
 
     @Value("${spring.data.redis.password}")
     private String password;
+    @Value("${REDIS_URL}")
+    private String uri;
 
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redissonClient() {
         Config config = new Config();
         // 단일 노드 Redis
         config.useSingleServer()
-                .setAddress("redis://127.0.0.1:6379")
+                .setAddress(uri)
                 .setPassword(password)
                 .setTimeout(3000);
 

@@ -6,6 +6,7 @@ import com.wootech.transtalk.exception.custom.ApplicationException;
 import com.wootech.transtalk.exception.custom.UnauthorizedException;
 import com.wootech.transtalk.event.Events;
 import com.wootech.transtalk.event.ExitToChatRoomEvent;
+import com.wootech.transtalk.exception.custom.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
@@ -40,11 +41,11 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String token = accessor.getFirstNativeHeader("Authorization");
-            if (token == null || !jwtUtil.validateToken(token.replace("Bearer ", ""))) {
+            if (token == null || !jwtUtil.validateToken(token)) {
                 throw new IllegalArgumentException("Invalid JWT Token");
             }
-
-            String userEmail = jwtUtil.getEmail(token.replace("Bearer ", ""));
+            log.info("[JwtChannelInterceptor] JWT Token={}", token);
+            String userEmail = jwtUtil.getEmail(token);
             accessor.setUser(new UsernamePasswordAuthenticationToken(userEmail, null, List.of()));
         } else if (StompCommand.UNSUBSCRIBE.equals(accessor.getCommand())) {
             exitToChatRoom(accessor);
@@ -63,14 +64,11 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
             }
             String userEmail;
             try {
-                String accessToken = jwtUtil.substringToken(token);
-                jwtUtil.validateToken(accessToken);
-                userEmail = jwtUtil.getEmail(accessToken);
+                jwtUtil.validateToken(token);
+                userEmail = jwtUtil.getEmail(token);
             } catch (RuntimeException e) {
                 log.error("[JwtChannelInterceptor] " + e.getClass());
                 throw new UnauthorizedException(e.getMessage(), HttpStatusCode.valueOf(401));
-            } catch (ServerException e) {
-                throw new ApplicationException(e.getMessage(), HttpStatusCode.valueOf(500));
             }
             accessor.setUser(new UsernamePasswordAuthenticationToken(userEmail, null, List.of(UserRole.ROLE_USER)));
         }

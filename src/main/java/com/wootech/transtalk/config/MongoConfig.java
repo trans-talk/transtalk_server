@@ -34,14 +34,17 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
         builder.applyConnectionString(new ConnectionString(uri))
                 .writeConcern(WriteConcern.MAJORITY)
                 .applyToSocketSettings(socketSetting -> socketSetting
-                        .connectTimeout(1, TimeUnit.MINUTES)
-                        .readTimeout(1, TimeUnit.MINUTES))
+                        .connectTimeout(5, TimeUnit.MINUTES)
+                        .readTimeout(1, TimeUnit.MINUTES)
+                )
                 .applyToConnectionPoolSettings(pool -> pool
                         .maxSize(100)
                         .maxSize(5)
-                        .maxConnectionIdleTime(10, TimeUnit.SECONDS))
+                        .maxConnectionIdleTime(10, TimeUnit.SECONDS)
+                )
                 .applyToSslSettings(ssl -> ssl.enabled(true))
                 .retryWrites(true)
+                .timeout(1, TimeUnit.MINUTES)
                 .build();
     }
 

@@ -5,10 +5,10 @@ spring:
     name: transtalk
 
   datasource:
-    url: jdbc:mysql://localhost:3306/transtalk?serverTimezone=UTC
+    url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   oauth:
       google:
@@ -32,6 +32,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
 
 jwt:
   secret:
