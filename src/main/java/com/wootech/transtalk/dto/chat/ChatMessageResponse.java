@@ -1,7 +1,6 @@
-package com.wootech.transtalk.dto;
+package com.wootech.transtalk.dto.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
-import java.time.Instant;
 import com.wootech.transtalk.enums.TranslationStatus;
 import java.time.LocalDateTime;
 

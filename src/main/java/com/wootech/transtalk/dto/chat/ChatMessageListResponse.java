@@ -1,7 +1,5 @@
-package com.wootech.transtalk.dto;
+package com.wootech.transtalk.dto.chat;
 
-import com.wootech.transtalk.dto.chatroom.ChatRoomListResponse;
-import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
