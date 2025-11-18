@@ -26,7 +26,7 @@ import static com.wootech.transtalk.exception.ErrorMessages.*;
 public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long ACCESS_TOKEN_TIME = 10 * 3 * 1000L; // 30초
+    private static final long ACCESS_TOKEN_TIME = 30 * 10 * 6 * 1000L; // 30분
     public static final int REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60; // 1주일
 
     @Value("${jwt.secret.key}")

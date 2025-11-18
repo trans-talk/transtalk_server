@@ -2,13 +2,13 @@ package com.wootech.transtalk.repository.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.entity.Chat;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 @Primary
