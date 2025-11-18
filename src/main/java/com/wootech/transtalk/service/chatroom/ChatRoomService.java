@@ -53,10 +53,10 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public ChatRoomResponse updateChatRoomInfo(Long chatRoomId, Long currentUserId) {
+    public ChatRoomResponse updateChatRoomInfo(Long chatRoomId, Long recipientId) {
         ChatRoom findChatRoom = findById(chatRoomId);
 
-        return convertToChatRoomResponse(currentUserId, findChatRoom);
+        return convertToChatRoomResponse(recipientId, findChatRoom);
     }
 
     @Transactional(readOnly = true)
@@ -69,10 +69,10 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public ChatRoomResponse convertToChatRoomResponse(Long currentUserId, ChatRoom chatRoom) {
-        User recipient = chatRoom.getRecipient(currentUserId);
+    public ChatRoomResponse convertToChatRoomResponse(Long recipientId, ChatRoom chatRoom) {
+        User recipient = chatRoom.getRecipient(recipientId);
         Chat lastChat = chatJpaRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
-        long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
+        long lastReadChatId = chatRoom.getLastReadChatId(recipientId);
 
         return new ChatRoomResponse(
                 chatRoom.getId(),
@@ -82,18 +82,16 @@ public class ChatRoomService {
                 lastChat != null ? lastChat.getOriginalContent() : "",
                 lastChat != null ? lastChat.getTranslatedContent() : "",
                 lastChat != null ? lastChat.getCreatedAt() : null,
-                lastChat != null ? (int) (lastChat.getId() - lastReadChatId) : 0);
+                lastChat != null ? (lastChat.getId() - lastReadChatId) : 0);
     }
 
     @Transactional
-    public void updateLastReadChatMessage(String userEamil, Long chatRoomId) {
+    public void updateLastReadChatMessage(String userEmail, Long chatRoomId) {
         ChatRoom chatRoom = findById(chatRoomId);
-        User currentUser = userService.getUserByEmail(userEamil);
+        User currentUser = userService.getUserByEmail(userEmail);
         User recipient = chatRoom.getRecipient(currentUser.getId());
 
-        Optional<Chat> lastRecipientChat = chatJpaRepository.findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(
-                recipient.getId(),
-                chatRoomId);
+        Optional<Chat> lastRecipientChat = chatJpaRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
         lastRecipientChat.ifPresent(chat -> chatRoom.exit(currentUser.getId(), chat.getId()));
     }
 }

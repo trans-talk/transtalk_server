@@ -3,11 +3,10 @@ package com.wootech.transtalk.entity;
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.enums.TranslationStatus;
 import jakarta.persistence.Id;
-import java.time.Instant;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Document(collection = "chat")
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class MongoChat {
-    @Id
+    @Id // object id
     private String id;
     private String originalContent;
     private TranslationStatus translationStatus;
@@ -26,11 +25,12 @@ public class MongoChat {
     private String senderEmail;
     private Instant createAt;
 
+    // 매핑: domain class -> mongo document
     public static MongoChat fromDomain(ChatMessage chatMessage) {
         return MongoChat.builder()
                 .originalContent(chatMessage.getOriginalContent())
-                .translatedContent(null) // 비동기 처리
-                .translationStatus(TranslationStatus.PENDING) // 대기 상태
+                .translatedContent(chatMessage.getTranslatedContent())
+                .translationStatus(chatMessage.getTranslationStatus())
                 .senderId(chatMessage.getSenderId())
                 .senderEmail(chatMessage.getSenderEmail())
                 .chatroomId(chatMessage.getChatRoomId())
@@ -38,6 +38,7 @@ public class MongoChat {
                 .createAt(Instant.now())
                 .build();
     }
+
     public ChatMessage toDomain() {
         return new ChatMessage(
                 this.id,
