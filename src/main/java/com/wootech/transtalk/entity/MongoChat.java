@@ -3,6 +3,7 @@ package com.wootech.transtalk.entity;
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.enums.TranslationStatus;
 import jakarta.persistence.Id;
+import java.time.Instant;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -23,7 +24,7 @@ public class MongoChat {
     private Long chatroomId;
     private Long senderId;
     private String senderEmail;
-    private LocalDateTime sendAt = LocalDateTime.now();
+    private Instant createAt;
 
     public static MongoChat fromDomain(ChatMessage chatMessage) {
         return MongoChat.builder()
@@ -34,7 +35,7 @@ public class MongoChat {
                 .senderEmail(chatMessage.getSenderEmail())
                 .chatroomId(chatMessage.getChatRoomId())
                 .isRead(chatMessage.isRead())
-                .sendAt(LocalDateTime.now())
+                .createAt(Instant.now())
                 .build();
     }
     public ChatMessage toDomain() {
@@ -46,7 +47,7 @@ public class MongoChat {
                 this.senderId,
                 this.senderEmail,
                 this.isRead,
-                this.sendAt,
+                this.createAt,
                 this.translationStatus
         );
     }

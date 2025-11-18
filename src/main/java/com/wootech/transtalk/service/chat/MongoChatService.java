@@ -76,7 +76,7 @@ public class MongoChatService {
                 sender.getId(),
                 senderEmail,
                 false,
-                LocalDateTime.now(),
+                null,
                 TranslationStatus.PENDING
         );
 
