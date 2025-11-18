@@ -21,7 +21,6 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-@Primary
 @RequiredArgsConstructor
 public class ChatRepositoryMongoAdapter implements ChatRepository {
     private final MongoTemplate mongoTemplate;

@@ -3,6 +3,7 @@ package com.wootech.transtalk.repository.chat;
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.entity.Chat;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
+@Primary
 @RequiredArgsConstructor
 public class ChatRepositoryJpaAdapter implements ChatRepository {
 
