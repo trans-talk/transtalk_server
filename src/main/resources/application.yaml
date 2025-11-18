@@ -1,3 +1,45 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: transtalk
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  oauth:
+      google:
+        client:
+          id: ${GOOGLE_CLIENT_ID}
+          secret: ${GOOGLE_CLIENT_SECRET}
+          redirection: ${GOOGLE_REDIRECTION_URI}
+          uri:
+            authorize: ${GOOGLE_AUTHORIZE_URI}
+            token: ${GOOGLE_TOKEN_URI}
+            profile: ${GOOGLE_PROFILE_URI}
+
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+
+    mongodb:
+      uri: ${MONGO_URI}
+      database: ${MONGO_DATABASE}
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+deepl:
+  key: ${DEEPL_API_KEY}

@@ -61,4 +61,6 @@ out/
 
 ### VS Code ###
 .vscode/
->>>>>>> 79aa214 (feat: Initial commit of Spring Boot project structure)
+
+### application properties
+.env
