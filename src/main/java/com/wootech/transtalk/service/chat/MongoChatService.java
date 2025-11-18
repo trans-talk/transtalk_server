@@ -1,8 +1,11 @@
 package com.wootech.transtalk.service.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
+import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.dto.chat.ChatMessageRequest;
-import com.wootech.transtalk.dto.chat.ChatMessageResponse;
+import com.wootech.transtalk.dto.chat.RecipientInfoRequest;
+import com.wootech.transtalk.dto.chat.mongo.MongoChatMessageListResponse;
+import com.wootech.transtalk.dto.chat.mongo.MongoChatMessageResponse;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslationStatus;
@@ -10,15 +13,15 @@ import com.wootech.transtalk.repository.chat.ChatRepositoryMongoAdapter;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import com.wootech.transtalk.service.translate.TranslationService;
 import com.wootech.transtalk.service.user.UserService;
-import java.security.Principal;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.security.Principal;
 
 @Slf4j
 @Service
@@ -42,14 +45,15 @@ public class MongoChatService {
             // 클라이언트에 메세지 전송 - 번역 완료된 메세지, 상태
             messagingTemplate.convertAndSend(
                     "/topic/chat/" + chat.getChatRoomId(),
-                    new ChatMessageResponse(
-                            Long.valueOf(translatedChat.getId()),
+                    new MongoChatMessageResponse(
+                            translatedChat.getId(),
                             translatedChat.getOriginalContent(),
                             translatedChat.getTranslatedContent(),
+                            translatedChat.getTranslationStatus(),
                             senderEmail,
-                            translatedChat.getCreatedAt(),
                             translatedChat.isRead(),
-                            translatedChat.getTranslationStatus()
+                            translatedChat.getCreatedAt()
+
                     )
             );
             log.info("[ChatService] Updated Translation Status={}", translatedChat.getTranslationStatus());
@@ -57,19 +61,14 @@ public class MongoChatService {
             log.error("[ChatService] Translation Failed With Chat: {}", chat.getId(), e);
         }
     }
-    /**
-     * 기능
-     * 1. chat 저장
-     * 2. chat 전송 - 번역 대기
-     * 3. chat 번역
-     * 4. 번역 완료된 chat 전송
-     **/
-    public ChatMessageResponse saveChat(Principal principal, ChatMessageRequest request, Long chatRoomId) {
+
+    public MongoChatMessageResponse saveChat(Principal principal, ChatMessageRequest request, Long chatRoomId) {
         String senderEmail = principal.getName();
         User sender = userService.getUserByEmail(senderEmail);
         ChatRoom foundChatRoom = chatRoomService.findById(chatRoomId);
 
-        ChatMessage chatMessage = new ChatMessage(null,
+        ChatMessage chatMessage = new ChatMessage(
+                null,
                 request.content(),
                 null,
                 chatRoomId,
@@ -80,39 +79,56 @@ public class MongoChatService {
                 TranslationStatus.PENDING
         );
 
-        // 몽고 디비 먼저 저장
+        // 1) 몽고 DB에 메시지 저장
         ChatMessage savedChat = chatRepositoryMongoAdapter.save(chatMessage);
 
-        // 비동기 번역 시작
+        // 2) 번역되기 전 메시지 즉시 클라이언트로 전송
+        messagingTemplate.convertAndSend(
+                "/topic/chat/" + chatRoomId,
+                new MongoChatMessageResponse(
+                        savedChat.getId(),
+                        savedChat.getOriginalContent(),
+                        null,
+                        TranslationStatus.PENDING,
+                        senderEmail,
+                        savedChat.isRead(),
+                        savedChat.getCreatedAt()
+                )
+        );
+
+        // 3) 비동기 번역 시작
         translateAndUpdate(savedChat, foundChatRoom.getLanguage().getCode(), senderEmail);
 
-        // 완료된 결과값
-        return new ChatMessageResponse(
-                Long.valueOf(savedChat.getId()),
+        return new MongoChatMessageResponse(
+                savedChat.getId(),
                 savedChat.getOriginalContent(),
                 savedChat.getTranslatedContent(),
+                savedChat.getTranslationStatus(),
                 senderEmail,
-                savedChat.getCreatedAt(),
                 savedChat.isRead(),
-                savedChat.getTranslationStatus()
+                savedChat.getCreatedAt()
         );
     }
+
+    public MongoChatMessageListResponse getChats(AuthUser authUser, Long chatRoomId, Pageable pageable) {
+        userService.getUserById(authUser.getUserId());
+
+        ChatRoom chatRoom = chatRoomService.findById(chatRoomId);
+        User recipient = chatRoom.getRecipient(authUser.getUserId());
+
+        Page<ChatMessage> chats = chatRepositoryMongoAdapter.findAllByChatRoomIdOrderByCreatedAt(chatRoomId, pageable);
+
+        Page<MongoChatMessageResponse> responses = chats.map(MongoChatMessageResponse::from);
+
+        RecipientInfoRequest recipientInfo = new RecipientInfoRequest(recipient.getPicture(), recipient.getEmail(),
+                recipient.getName());
+
+        return MongoChatMessageListResponse.from(responses, recipientInfo);
+    }
+
     // 마지막 채팅 조회 메서드
     public void findLastChat(Long chatRoomId) {
         ChatMessage chatMessage = chatRepositoryMongoAdapter.findLastByChatRoomIdOrderByCreatedAtDesc(chatRoomId)
                 .orElseThrow(() -> new RuntimeException(""));
-        //TODO 응답 DTO가 필요합니다.
-    }
-
-    // 안 읽은 메세지 조회 메서드 -> 필요 없을 것 같습니다.
-    public void countUnreadChats(Long chatRoomId) {
-        Criteria criteria = new Criteria()
-                .andOperator(
-                        Criteria.where("chatroomId").is(chatRoomId),
-                        Criteria.where("read").is(false)
-                );
-
-        Query query = new Query(criteria);
-//        return mongoTemplate.count(query, MongoChat.class);
     }
 }
