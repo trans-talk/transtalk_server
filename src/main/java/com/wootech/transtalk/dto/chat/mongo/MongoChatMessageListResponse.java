@@ -18,7 +18,7 @@ public class MongoChatMessageListResponse {
     private boolean hasNext;
     private boolean isLast;
     private long totalElements;
-    private RecipientInfoRequest recipientInfoRequest;
+    private RecipientInfoRequest recipient;
 
     public static MongoChatMessageListResponse from(Page<MongoChatMessageResponse> pages, RecipientInfoRequest recipient) {
         return new MongoChatMessageListResponse(

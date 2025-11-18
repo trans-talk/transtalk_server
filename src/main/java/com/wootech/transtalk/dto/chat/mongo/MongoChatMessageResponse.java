@@ -14,10 +14,10 @@ import java.time.Instant;
 @NoArgsConstructor
 @Builder
 public class MongoChatMessageResponse {
-    private String id;
-    private String originalContent;
-    private String translatedContent;
-    private TranslationStatus translationStatus;
+    private String charId;
+    private String originalMessage;
+    private String translatedMessage;
+    private TranslationStatus status;
     private String senderEmail;
     private boolean isRead;
     private Instant sendAt;
