@@ -19,7 +19,7 @@ public class MongoChat {
     private String originalContent;
     private TranslationStatus translationStatus;
     private String translatedContent;
-    private int unReadCount = 1;
+    private boolean isRead;
     private Long chatroomId;
     private Long senderId;
     private String senderEmail;
@@ -33,6 +33,7 @@ public class MongoChat {
                 .senderId(chatMessage.getSenderId())
                 .senderEmail(chatMessage.getSenderEmail())
                 .chatroomId(chatMessage.getChatRoomId())
+                .isRead(chatMessage.isRead())
                 .sendAt(LocalDateTime.now())
                 .build();
     }
@@ -44,7 +45,7 @@ public class MongoChat {
                 this.chatroomId,
                 this.senderId,
                 this.senderEmail,
-                this.unReadCount,
+                this.isRead,
                 this.sendAt,
                 this.translationStatus
         );

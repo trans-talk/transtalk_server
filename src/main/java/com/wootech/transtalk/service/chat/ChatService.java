@@ -2,23 +2,19 @@ package com.wootech.transtalk.service.chat;
 
 
 import com.wootech.transtalk.domain.ChatMessage;
-import com.wootech.transtalk.dto.ChatMessageListResponse;
-import com.wootech.transtalk.dto.ChatMessageRequest;
-import com.wootech.transtalk.dto.ChatMessageResponse;
+import com.wootech.transtalk.dto.chat.ChatMessageListResponse;
+import com.wootech.transtalk.dto.chat.ChatMessageResponse;
 import com.wootech.transtalk.dto.auth.AuthUser;
+import com.wootech.transtalk.dto.chat.RecipientInfoRequest;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslationStatus;
 import com.wootech.transtalk.repository.chat.ChatRepository;
-import com.wootech.transtalk.repository.chat.ChatRepositoryJpaAdapter;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import com.wootech.transtalk.service.translate.TranslationService;
 import com.wootech.transtalk.service.user.UserService;
-import java.time.ZoneId;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -44,7 +40,7 @@ public class ChatService {
                 chatRoomId,
                 sender.getId(),
                 senderEmail,
-                1,
+                false,
                 null,
                 TranslationStatus.PENDING
         );
@@ -58,7 +54,7 @@ public class ChatService {
                 savedChat.getTranslatedContent(),
                 sender.getEmail(),
                 savedChat.getCreatedAt(),
-                savedChat.getUnReadCount(),
+                savedChat.isRead(),
                 savedChat.getTranslationStatus());
     }
 
@@ -76,7 +72,7 @@ public class ChatService {
                         translatedChat.getTranslatedContent(),
                         senderEmail,
                         translatedChat.getCreatedAt(),
-                        0,
+                        translatedChat.isRead(),
                         translatedChat.getTranslationStatus()
                 ));
     }
@@ -91,13 +87,18 @@ public class ChatService {
     @Transactional
     public ChatMessageListResponse getChats(AuthUser authUser, Long chatRoomId, Pageable pageable) {
         //사용자 검증 해야함
+        ChatRoom chatRoom = chatRoomService.findById(chatRoomId);
+        User recipient = chatRoom.getRecipient(authUser.getUserId());
 
         Page<ChatMessage> findChat = chatRepository.findAllByChatRoomIdOrderByCreatedAt(
                 chatRoomId, pageable);
 
         Page<ChatMessageResponse> responses = findChat.map(ChatMessageResponse::from);
 
-        return ChatMessageListResponse.from(responses);
+        RecipientInfoRequest recipientInfo = new RecipientInfoRequest(recipient.getPicture(), recipient.getEmail(),
+                recipient.getName());
+
+        return ChatMessageListResponse.from(responses, recipientInfo);
     }
 
 }

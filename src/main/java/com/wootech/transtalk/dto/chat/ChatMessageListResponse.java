@@ -1,7 +1,5 @@
-package com.wootech.transtalk.dto;
+package com.wootech.transtalk.dto.chat;
 
-import com.wootech.transtalk.dto.chatroom.ChatRoomListResponse;
-import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
@@ -10,15 +8,17 @@ public record ChatMessageListResponse(List<ChatMessageResponse> chats,
                                       int pageSize,
                                       boolean hasNext,
                                       boolean isLast,
-                                      long totalElements) {
-    public static ChatMessageListResponse from(Page<ChatMessageResponse> pages) {
+                                      long totalElements,
+                                      RecipientInfoRequest recipient) {
+    public static ChatMessageListResponse from(Page<ChatMessageResponse> pages,RecipientInfoRequest recipient) {
         return new ChatMessageListResponse(
                 pages.getContent(),
                 pages.getNumber(),
                 pages.getSize(),
                 pages.hasNext(),
                 pages.isLast(),
-                pages.getTotalElements()
+                pages.getTotalElements(),
+                recipient
         );
     }
 

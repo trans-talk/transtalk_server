@@ -26,7 +26,7 @@ public class Chat extends TimeStamped {
     @Column(nullable = true)
     private String translatedContent;
     @Column(nullable = false)
-    private int unreadCount;
+    private boolean isRead;
     @Column(nullable = false)
     private Long senderId;
     @Column(nullable = false)
@@ -35,9 +35,9 @@ public class Chat extends TimeStamped {
     @Column(nullable = false)
     private String senderEmail;
 
-    public Chat(String originalContent, Long senderId, String senderEmail,Long chatRoomId) {
+    public Chat(String originalContent, Long senderId, String senderEmail, Long chatRoomId, boolean isRead) {
         this.originalContent = originalContent;
-        this.unreadCount = 1;
+        this.isRead = isRead;
         this.senderId = senderId;
         this.senderEmail = senderEmail;
         this.chatRoomId = chatRoomId;
@@ -55,7 +55,8 @@ public class Chat extends TimeStamped {
                 chatMessage.getOriginalContent(),
                 chatMessage.getSenderId(),
                 chatMessage.getSenderEmail(),
-                chatMessage.getChatRoomId()
+                chatMessage.getChatRoomId(),
+                chatMessage.isRead()
                 );
 
         return entity;
@@ -69,7 +70,7 @@ public class Chat extends TimeStamped {
                 this.chatRoomId,
                 this.senderId,
                 this.senderEmail,
-                this.unreadCount,
+                this.isRead,
                 LocalDateTime.ofInstant(this.getCreatedAt(), ZoneId.of("Asia/Seoul")),
                 this.translationStatus
         );
