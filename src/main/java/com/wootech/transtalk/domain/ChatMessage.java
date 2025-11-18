@@ -7,7 +7,6 @@ import com.wootech.transtalk.event.Events;
 import com.wootech.transtalk.event.MessageNotificationEvent;
 import com.wootech.transtalk.exception.custom.ConflictException;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import org.springframework.http.HttpStatusCode;
 
 public class ChatMessage {
