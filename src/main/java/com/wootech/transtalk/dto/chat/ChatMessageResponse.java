@@ -2,10 +2,11 @@ package com.wootech.transtalk.dto.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.enums.TranslationStatus;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public record ChatMessageResponse(Long chatId, String originalMessage, String translatedMessage,
-                                  String senderEmail, LocalDateTime sendAt, boolean isRead, TranslationStatus status) {
+                                  String senderEmail, Instant sendAt, boolean isRead, TranslationStatus status) {
     public static ChatMessageResponse from(ChatMessage message) {
         return new ChatMessageResponse(
                 Long.valueOf(message.getId()),

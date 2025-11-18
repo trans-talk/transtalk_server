@@ -71,7 +71,7 @@ public class Chat extends TimeStamped {
                 this.senderId,
                 this.senderEmail,
                 this.isRead,
-                LocalDateTime.ofInstant(this.getCreatedAt(), ZoneId.of("Asia/Seoul")),
+                this.getCreatedAt(),
                 this.translationStatus
         );
     }

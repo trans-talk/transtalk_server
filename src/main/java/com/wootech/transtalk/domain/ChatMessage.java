@@ -6,6 +6,7 @@ import com.wootech.transtalk.enums.TranslationStatus;
 import com.wootech.transtalk.event.Events;
 import com.wootech.transtalk.event.MessageNotificationEvent;
 import com.wootech.transtalk.exception.custom.ConflictException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatusCode;
 
@@ -17,11 +18,11 @@ public class ChatMessage {
     private Long senderId;
     private String senderEmail;
     private boolean isRead;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     private TranslationStatus translationStatus;
 
     public ChatMessage(String id, String originalContent, String translatedContent, Long chatRoomId, Long senderId, String senderEmail,
-                       boolean isRead, LocalDateTime createdAt, TranslationStatus translationStatus) {
+                       boolean isRead, Instant createdAt, TranslationStatus translationStatus) {
         this.id = id;
         this.originalContent = originalContent;
         this.translatedContent = translatedContent;
@@ -61,7 +62,7 @@ public class ChatMessage {
         return isRead;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
