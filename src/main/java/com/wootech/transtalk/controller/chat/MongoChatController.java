@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @Slf4j
-@RestController
+//@RestController
 @RequiredArgsConstructor
 public class MongoChatController {
 

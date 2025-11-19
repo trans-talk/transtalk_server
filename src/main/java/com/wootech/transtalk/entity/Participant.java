@@ -26,6 +26,7 @@ public class Participant {
     public Participant(User user, ChatRoom chatRoom) {
         this.user = user;
         joinChatRoom(chatRoom);
+        lastReadTime = Instant.now();
     }
 
     private void joinChatRoom(ChatRoom chatRoom) {

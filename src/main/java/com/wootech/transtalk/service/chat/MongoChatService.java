@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 
 @Slf4j
-@Service
+//@Service
 @RequiredArgsConstructor
 public class MongoChatService {
     private final UserService userService;
