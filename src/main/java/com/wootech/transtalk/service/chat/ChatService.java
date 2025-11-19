@@ -104,14 +104,4 @@ public class ChatService {
         return ChatMessageListResponse.from(responses, recipientInfo);
     }
 
-    @Transactional
-    public Optional<ChatMessage> findLastChatByChatRoomId(Long chatRoomId) {
-        return chatRepository.findLastByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
-    }
-
-    @Transactional
-    public int getUnreadCount(Long chatRoomId, Instant lastReadTime) {
-        return chatRepository.countByChatRoomIdAndCreateAtAfter(chatRoomId, lastReadTime);
-    }
-
 }
