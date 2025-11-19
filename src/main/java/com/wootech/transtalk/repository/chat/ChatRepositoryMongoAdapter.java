@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
+@Primary
 @Repository
 @RequiredArgsConstructor
 public class ChatRepositoryMongoAdapter implements ChatRepository {
@@ -36,8 +37,8 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
     // 채팅방 id로 마지막 채팅 찾기
     @Override
     public Optional<ChatMessage> findLastByChatRoomIdOrderByCreatedAtDesc(Long chatRoomId) {
-        Query query = new Query(Criteria.where("chatroomId").is(chatRoomId))
-                .with(Sort.by(Sort.Direction.DESC, "sendAt"))
+        Query query = new Query(Criteria.where("chatRoomId").is(chatRoomId))
+                .with(Sort.by(Sort.Direction.DESC, "createdAt"))
                 .limit(1);
 
         MongoChat chat = mongoTemplate.findOne(query, MongoChat.class);
@@ -90,9 +91,9 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
     public int countByChatRoomIdAndCreateAtAfter(Long chatRoomId, Instant lastReadTime) {
         Query query = new Query();
         query.addCriteria(Criteria.where("chatRoomId").is(chatRoomId)
-                .and("createAt").gt(lastReadTime));
+                .and("createdAt").gt(lastReadTime));
 
-        return (int) mongoTemplate.count(query, ChatMessage.class);
+        return (int) mongoTemplate.count(query, MongoChat.class);
     }
 
     @Override

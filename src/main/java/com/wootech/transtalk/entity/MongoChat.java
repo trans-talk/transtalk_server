@@ -20,10 +20,10 @@ public class MongoChat {
     private TranslationStatus translationStatus;
     private String translatedContent;
     private boolean isRead;
-    private Long chatroomId;
+    private Long chatRoomId;
     private Long senderId;
     private String senderEmail;
-    private Instant createAt;
+    private Instant createdAt;
 
     // 매핑: domain class -> mongo document
     public static MongoChat fromDomain(ChatMessage chatMessage) {
@@ -33,9 +33,9 @@ public class MongoChat {
                 .translationStatus(chatMessage.getTranslationStatus())
                 .senderId(chatMessage.getSenderId())
                 .senderEmail(chatMessage.getSenderEmail())
-                .chatroomId(chatMessage.getChatRoomId())
+                .chatRoomId(chatMessage.getChatRoomId())
                 .isRead(chatMessage.isRead())
-                .createAt(Instant.now())
+                .createdAt(Instant.now())
                 .build();
     }
 
@@ -44,11 +44,11 @@ public class MongoChat {
                 this.id,
                 this.originalContent,
                 this.translatedContent,
-                this.chatroomId,
+                this.chatRoomId,
                 this.senderId,
                 this.senderEmail,
                 this.isRead,
-                this.createAt,
+                this.createdAt,
                 this.translationStatus
         );
     }
