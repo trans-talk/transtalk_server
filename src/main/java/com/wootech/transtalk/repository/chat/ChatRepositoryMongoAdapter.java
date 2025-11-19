@@ -48,25 +48,6 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
                 .map(MongoChat::toDomain);
     }
 
-
-    // 채팅방 id와 상대방 id로 마지막 메세지를 찾기
-    @Override
-    public Optional<ChatMessage> findLastByRecipientIdAndChatRoomIdOrderByCreatedAtDesc(Long senderId,
-                                                                                        Long chatRoomId) {
-        Query query = new Query(
-                Criteria.where("chatroomId").is(chatRoomId)
-                        .and("senderId").is(senderId)
-        )
-                .with(Sort.by(Sort.Direction.DESC, "sendAt"))
-                .limit(1);
-
-        MongoChat chat = mongoTemplate.findOne(query, MongoChat.class);
-
-        return Optional.ofNullable(chat)
-                .map(MongoChat::toDomain);
-    }
-
-
     @Override
     public Page<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable) {
         Query query = new Query(

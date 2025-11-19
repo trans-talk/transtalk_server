@@ -30,13 +30,6 @@ public class ChatRepositoryJpaAdapter implements ChatRepository {
     }
 
     @Override
-    public Optional<ChatMessage> findLastByRecipientIdAndChatRoomIdOrderByCreatedAtDesc(Long senderId,
-                                                                                        Long chatRoomId) {
-        return jpaRepository.findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(senderId, chatRoomId)
-                .map(Chat::toDomain);
-    }
-
-    @Override
     public ChatMessage updateTranslation(ChatMessage changeChat) {
         Chat chat = jpaRepository.findById(Long.valueOf(changeChat.getId())).get();
         chat.applyDomain(changeChat);
