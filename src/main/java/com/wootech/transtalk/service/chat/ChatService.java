@@ -6,6 +6,7 @@ import com.wootech.transtalk.dto.chat.ChatMessageListResponse;
 import com.wootech.transtalk.dto.chat.ChatMessageResponse;
 import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.dto.chat.RecipientInfoRequest;
+import com.wootech.transtalk.entity.Chat;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslationStatus;
@@ -13,6 +14,8 @@ import com.wootech.transtalk.repository.chat.ChatRepository;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import com.wootech.transtalk.service.translate.TranslationService;
 import com.wootech.transtalk.service.user.UserService;
+import java.time.Instant;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -99,6 +102,16 @@ public class ChatService {
                 recipient.getName());
 
         return ChatMessageListResponse.from(responses, recipientInfo);
+    }
+
+    @Transactional
+    public Optional<ChatMessage> findLastChatByChatRoomId(Long chatRoomId) {
+        return chatRepository.findLastByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
+    }
+
+    @Transactional
+    public int getUnreadCount(Long chatRoomId, Instant lastReadTime) {
+        return chatRepository.countByChatRoomIdAndCreateAtAfter(chatRoomId, lastReadTime);
     }
 
 }

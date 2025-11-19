@@ -1,6 +1,7 @@
 package com.wootech.transtalk.repository.chat;
 
 import com.wootech.transtalk.entity.Chat;
+import java.time.Instant;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,4 +15,6 @@ public interface ChatJpaRepository extends JpaRepository<Chat, Long> {
     Optional<Chat> findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(Long senderId, Long chatRoomId);
 
     Page<Chat> findByChatRoomIdOrderByCreatedAtDesc(Long chatRoomId, Pageable pageable);
+
+    int countByChatRoomIdAndCreatedAtAfter(Long chatRoomId, Instant lastReadTime);
 }

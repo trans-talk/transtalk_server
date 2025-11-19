@@ -2,6 +2,7 @@ package com.wootech.transtalk.repository.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.enums.TranslationStatus;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -19,4 +20,6 @@ public interface ChatRepository {
     Optional<ChatMessage> findById(Long chatId);
 
     Page<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable);
+
+    int countByChatRoomIdAndCreateAtAfter(Long chatRoomId, Instant lastReadTime);
 }

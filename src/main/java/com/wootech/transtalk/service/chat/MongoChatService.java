@@ -126,9 +126,5 @@ public class MongoChatService {
         return MongoChatMessageListResponse.from(responses, recipientInfo);
     }
 
-    // 마지막 채팅 조회 메서드
-    public void findLastChat(Long chatRoomId) {
-        ChatMessage chatMessage = chatRepositoryMongoAdapter.findLastByChatRoomIdOrderByCreatedAtDesc(chatRoomId)
-                .orElseThrow(() -> new RuntimeException(""));
-    }
+
 }
