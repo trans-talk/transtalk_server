@@ -47,7 +47,7 @@ public class ChatService {
                 sender.getId(),
                 senderEmail,
                 false,
-                null,
+                Instant.now(),
                 TranslationStatus.PENDING
         );
         ChatMessage savedChat = chatRepository.save(chatMessage);

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -69,14 +70,14 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
     @Override
     public Page<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable) {
         Query query = new Query(
-                Criteria.where("chatroomId").is(chatRoomId)
+                Criteria.where("chatRoomId").is(chatRoomId)
         )
                 .with(pageable)
-                .with(Sort.by(Sort.Direction.ASC, "sendAt"));
+                .with(Sort.by(Direction.DESC, "createdAt"));
 
         List<MongoChat> chatList = mongoTemplate.find(query, MongoChat.class);
         long total = mongoTemplate.count(
-                new Query(Criteria.where("chatroomId").is(chatRoomId)),
+                new Query(Criteria.where("chatRoomId").is(chatRoomId)),
                 MongoChat.class
         );
 

@@ -35,7 +35,7 @@ public class MongoChat {
                 .senderEmail(chatMessage.getSenderEmail())
                 .chatRoomId(chatMessage.getChatRoomId())
                 .isRead(chatMessage.isRead())
-                .createdAt(Instant.now())
+                .createdAt(chatMessage.getCreatedAt())
                 .build();
     }
 
