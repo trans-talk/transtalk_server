@@ -2,6 +2,7 @@ package com.wootech.transtalk.repository.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.entity.Chat;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
@@ -53,7 +54,12 @@ public class ChatRepositoryJpaAdapter implements ChatRepository {
     public Page<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable) {
         Page<Chat> chatPage = jpaRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId, pageable);
 
-        return chatPage.map(chat -> chat.toDomain());
+        return chatPage.map(Chat::toDomain);
+    }
+
+    @Override
+    public int countByChatRoomIdAndCreateAtAfter(Long chatRoomId, Instant lastReadTime) {
+        return jpaRepository.countByChatRoomIdAndCreatedAtAfter(chatRoomId, lastReadTime);
     }
 
 

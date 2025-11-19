@@ -2,6 +2,7 @@ package com.wootech.transtalk.repository.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.entity.MongoChat;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -86,6 +87,15 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
     }
 
     @Override
+    public int countByChatRoomIdAndCreateAtAfter(Long chatRoomId, Instant lastReadTime) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("chatRoomId").is(chatRoomId)
+                .and("createAt").gt(lastReadTime));
+
+        return (int) mongoTemplate.count(query, ChatMessage.class);
+    }
+
+    @Override
     public ChatMessage updateTranslation(ChatMessage changeChat) {
         String chatMongoId = changeChat.getId();
         // 업데이트 쿼리
@@ -110,18 +120,5 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
         return Optional.ofNullable(chat)
                 .map(MongoChat::toDomain);
     }
-
-    // 안 읽은 메세지 수 조회 메서드
-    public long countUnreadChats(Long chatRoomId) {
-        Criteria criteria = new Criteria()
-                .andOperator(
-                        Criteria.where("chatroomId").is(chatRoomId),
-                        Criteria.where("isRead").is(false)
-                );
-
-        Query query = new Query(criteria);
-        return mongoTemplate.count(query, MongoChat.class);
-    }
-
 
 }
