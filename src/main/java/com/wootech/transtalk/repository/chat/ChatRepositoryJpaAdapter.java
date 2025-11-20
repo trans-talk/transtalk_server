@@ -4,7 +4,6 @@ import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.entity.Chat;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-@Primary
 @RequiredArgsConstructor
 public class ChatRepositoryJpaAdapter implements ChatRepository {
 
@@ -29,13 +27,6 @@ public class ChatRepositoryJpaAdapter implements ChatRepository {
     public Optional<ChatMessage> findLastByChatRoomIdOrderByCreatedAtDesc(Long chatRoomId) {
         return jpaRepository.findTopByChatRoomIdOrderByCreatedAtDesc(
                 chatRoomId).map(Chat::toDomain);
-    }
-
-    @Override
-    public Optional<ChatMessage> findLastByRecipientIdAndChatRoomIdOrderByCreatedAtDesc(Long senderId,
-                                                                                        Long chatRoomId) {
-        return jpaRepository.findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(senderId, chatRoomId)
-                .map(Chat::toDomain);
     }
 
     @Override
