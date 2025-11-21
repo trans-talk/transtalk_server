@@ -2,6 +2,7 @@ package com.wootech.transtalk.repository.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.entity.MongoChat;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
+@Primary
 @Repository
 @RequiredArgsConstructor
 public class ChatRepositoryMongoAdapter implements ChatRepository {
@@ -35,8 +38,8 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
     // 채팅방 id로 마지막 채팅 찾기
     @Override
     public Optional<ChatMessage> findLastByChatRoomIdOrderByCreatedAtDesc(Long chatRoomId) {
-        Query query = new Query(Criteria.where("chatroomId").is(chatRoomId))
-                .with(Sort.by(Sort.Direction.DESC, "sendAt"))
+        Query query = new Query(Criteria.where("chatRoomId").is(chatRoomId))
+                .with(Sort.by(Sort.Direction.DESC, "createdAt"))
                 .limit(1);
 
         MongoChat chat = mongoTemplate.findOne(query, MongoChat.class);
@@ -44,37 +47,18 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
         return Optional.ofNullable(chat)
                 .map(MongoChat::toDomain);
     }
-
-
-    // 채팅방 id와 상대방 id로 마지막 메세지를 찾기
-    @Override
-    public Optional<ChatMessage> findLastByRecipientIdAndChatRoomIdOrderByCreatedAtDesc(Long senderId,
-                                                                                        Long chatRoomId) {
-        Query query = new Query(
-                Criteria.where("chatroomId").is(chatRoomId)
-                        .and("senderId").is(senderId)
-        )
-                .with(Sort.by(Sort.Direction.DESC, "sendAt"))
-                .limit(1);
-
-        MongoChat chat = mongoTemplate.findOne(query, MongoChat.class);
-
-        return Optional.ofNullable(chat)
-                .map(MongoChat::toDomain);
-    }
-
 
     @Override
     public Page<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable) {
         Query query = new Query(
-                Criteria.where("chatroomId").is(chatRoomId)
+                Criteria.where("chatRoomId").is(chatRoomId)
         )
                 .with(pageable)
-                .with(Sort.by(Sort.Direction.ASC, "sendAt"));
+                .with(Sort.by(Direction.DESC, "createdAt"));
 
         List<MongoChat> chatList = mongoTemplate.find(query, MongoChat.class);
         long total = mongoTemplate.count(
-                new Query(Criteria.where("chatroomId").is(chatRoomId)),
+                new Query(Criteria.where("chatRoomId").is(chatRoomId)),
                 MongoChat.class
         );
 
@@ -83,6 +67,15 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
                 .toList();
 
         return new org.springframework.data.domain.PageImpl<>(results, pageable, total);
+    }
+
+    @Override
+    public int countByChatRoomIdAndCreateAtAfter(Long chatRoomId, Instant lastReadTime) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("chatRoomId").is(chatRoomId)
+                .and("createdAt").gt(lastReadTime));
+
+        return (int) mongoTemplate.count(query, MongoChat.class);
     }
 
     @Override
@@ -110,18 +103,5 @@ public class ChatRepositoryMongoAdapter implements ChatRepository {
         return Optional.ofNullable(chat)
                 .map(MongoChat::toDomain);
     }
-
-    // 안 읽은 메세지 수 조회 메서드
-    public long countUnreadChats(Long chatRoomId) {
-        Criteria criteria = new Criteria()
-                .andOperator(
-                        Criteria.where("chatroomId").is(chatRoomId),
-                        Criteria.where("isRead").is(false)
-                );
-
-        Query query = new Query(criteria);
-        return mongoTemplate.count(query, MongoChat.class);
-    }
-
 
 }

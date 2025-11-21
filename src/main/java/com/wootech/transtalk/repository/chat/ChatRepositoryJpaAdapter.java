@@ -2,8 +2,8 @@ package com.wootech.transtalk.repository.chat;
 
 import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.entity.Chat;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-@Primary
 @RequiredArgsConstructor
 public class ChatRepositoryJpaAdapter implements ChatRepository {
 
@@ -31,13 +30,6 @@ public class ChatRepositoryJpaAdapter implements ChatRepository {
     }
 
     @Override
-    public Optional<ChatMessage> findLastByRecipientIdAndChatRoomIdOrderByCreatedAtDesc(Long senderId,
-                                                                                        Long chatRoomId) {
-        return jpaRepository.findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(senderId, chatRoomId)
-                .map(Chat::toDomain);
-    }
-
-    @Override
     public ChatMessage updateTranslation(ChatMessage changeChat) {
         Chat chat = jpaRepository.findById(Long.valueOf(changeChat.getId())).get();
         chat.applyDomain(changeChat);
@@ -53,7 +45,12 @@ public class ChatRepositoryJpaAdapter implements ChatRepository {
     public Page<ChatMessage> findAllByChatRoomIdOrderByCreatedAt(Long chatRoomId, Pageable pageable) {
         Page<Chat> chatPage = jpaRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId, pageable);
 
-        return chatPage.map(chat -> chat.toDomain());
+        return chatPage.map(Chat::toDomain);
+    }
+
+    @Override
+    public int countByChatRoomIdAndCreateAtAfter(Long chatRoomId, Instant lastReadTime) {
+        return jpaRepository.countByChatRoomIdAndCreatedAtAfter(chatRoomId, lastReadTime);
     }
 
 
