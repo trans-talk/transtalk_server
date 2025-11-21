@@ -17,6 +17,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 
 import static com.wootech.transtalk.config.util.CookieUtil.addRefreshTokenCookie;
+import static com.wootech.transtalk.config.util.CookieUtil.deleteRefreshTokenCookie;
 import static com.wootech.transtalk.exception.ErrorMessages.ACCESS_TOKEN_DOES_NOT_EXISTS_ERROR;
 
 @Slf4j
@@ -73,7 +74,8 @@ public class AuthController {
     @DeleteMapping("/withdraw")
     public ApiResponse<Object> withdrawUser(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-            @AuthenticationPrincipal AuthUser authUser
+            @AuthenticationPrincipal AuthUser authUser,
+            HttpServletResponse response
     ) {
         String accessToken = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -81,6 +83,7 @@ public class AuthController {
         }
         if (accessToken != null) {
             authService.withdrawUser(authUser, accessToken);
+            deleteRefreshTokenCookie(response);
             return ApiResponse.builder()
                     .success(true)
                     .message("회원탈퇴에 성공했습니다.")
