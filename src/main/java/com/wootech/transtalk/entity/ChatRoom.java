@@ -29,6 +29,8 @@ public class ChatRoom extends TimeStamped {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.PERSIST)
     private List<Participant> participants = new ArrayList<>();
 
+    private Instant lastMessageTime;
+
     public ChatRoom(TranslateLanguage language) {
         this.language = language;
     }
@@ -54,5 +56,9 @@ public class ChatRoom extends TimeStamped {
                 .filter(participant -> participant.getUser().getId().equals(currentUserId)).findFirst()
                 .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
         me.markAsExited();
+    }
+
+    public void newMessageArrived(Instant lastMessageTime) {
+        this.lastMessageTime = lastMessageTime;
     }
 }
