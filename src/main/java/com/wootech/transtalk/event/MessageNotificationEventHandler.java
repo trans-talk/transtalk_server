@@ -25,7 +25,7 @@ public class MessageNotificationEventHandler {
         ChatRoom findChatRoom = chatRoomService.findById(event.getChatRoomId());
         User recipient = findChatRoom.getRecipient(event.getCurrentUserId());
 
-        ChatRoomResponse response = chatRoomService.updateChatRoomInfo(event.getChatRoomId(), event.getCurrentUserId());
+        ChatRoomResponse response = chatRoomService.updateChatRoomInfo(event.getChatRoomId(), recipient.getId());
         messagingTemplate.convertAndSend(
                 "/topic/users/" + recipient.getId() + "/chatRoom",
                 response

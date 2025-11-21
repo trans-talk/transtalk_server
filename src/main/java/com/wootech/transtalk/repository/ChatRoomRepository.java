@@ -12,16 +12,21 @@ import java.util.Optional;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom,Long> {
     @Query("""
-            SELECT cr FROM ChatRoom cr
+            SELECT cr 
+            FROM ChatRoom cr
             JOIN cr.participants p
+            JOIN cr.participants p2
             WHERE p.user.id = :userId
+            AND (:name IS NULL OR p2.user.name LIKE CONCAT('%',:name,'%'))
             ORDER BY(
             SELECT MAX(c.createdAt)
             FROM Chat c
             WHERE c.chatRoomId = cr.id
             ) DESC 
             """)
-    Page<ChatRoom> findByParticipantsUserId(@Param("userId") Long userId, Pageable pageable);
+    Page<ChatRoom> findByParticipantsUserId(@Param("userId") Long userId,
+                                            @Param("name") String name,
+                                            Pageable pageable);
 
     @Query("""
             SELECT cr 

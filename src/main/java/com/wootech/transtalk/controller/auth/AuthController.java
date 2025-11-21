@@ -59,6 +59,7 @@ public class AuthController {
     }
 
     // 로그아웃
+    // spring security가 먼저 처리해 응답이 안보일 수 있음
     @PostMapping("/logout")
     public ApiResponse<Object> logOut() {
         return ApiResponse.builder()

@@ -2,18 +2,18 @@ package com.wootech.transtalk.service.chatroom;
 
 import static com.wootech.transtalk.exception.ErrorMessages.*;
 
+import com.wootech.transtalk.domain.ChatMessage;
 import com.wootech.transtalk.dto.chatroom.ChatRoomResponse;
 import com.wootech.transtalk.dto.chatroom.CreateChatRoomResponse;
-import com.wootech.transtalk.entity.Chat;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.Participant;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.exception.custom.NotFoundException;
-import com.wootech.transtalk.repository.chat.ChatJpaRepository;
 import com.wootech.transtalk.repository.ChatRoomRepository;
+import com.wootech.transtalk.service.chat.ChatParticipantService;
 import com.wootech.transtalk.service.user.UserService;
-import java.util.Optional;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserService userService;
-    private final ChatJpaRepository chatJpaRepository;
+    private final ChatParticipantService chatParticipantService;
 
     @Transactional
     public CreateChatRoomResponse save(TranslateLanguage language, String senderEmail, String recipientEmail) {
@@ -45,18 +45,18 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public Page<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId, Pageable pageable) {
+    public Page<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId, String name, Pageable pageable) {
         User currentUser = userService.getUserById(currentUserId);
-        Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, pageable);
+        Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, name, pageable);
 
         return chatRooms.map(chatRoom -> convertToChatRoomResponse(currentUserId, chatRoom));
     }
 
     @Transactional
-    public ChatRoomResponse updateChatRoomInfo(Long chatRoomId, Long currentUserId) {
+    public ChatRoomResponse updateChatRoomInfo(Long chatRoomId, Long recipientId) {
         ChatRoom findChatRoom = findById(chatRoomId);
 
-        return convertToChatRoomResponse(currentUserId, findChatRoom);
+        return convertToChatRoomResponse(recipientId, findChatRoom);
     }
 
     @Transactional(readOnly = true)
@@ -69,10 +69,13 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public ChatRoomResponse convertToChatRoomResponse(Long currentUserId, ChatRoom chatRoom) {
-        User recipient = chatRoom.getRecipient(currentUserId);
-        Chat lastChat = chatJpaRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()).orElse(null);
-        long lastReadChatId = chatRoom.getLastReadChatId(currentUserId);
+    public ChatRoomResponse convertToChatRoomResponse(Long recipientId, ChatRoom chatRoom) {
+        User recipient = chatRoom.getRecipient(recipientId);
+        //채팅방의 가장 마지막 메세지
+        ChatMessage lastChat = chatParticipantService.findLastChatByChatRoomId(chatRoom.getId()).orElse(null);
+        //마지막 읽은 메세지 부터 - 현재 저장된 메세지 개수를 구하는 메서드
+        Instant myLastReadTime = chatRoom.getMyLastReadTime(recipientId);
+        int unreadCount = chatParticipantService.getUnreadCount(chatRoom.getId(), myLastReadTime);
 
         return new ChatRoomResponse(
                 chatRoom.getId(),
@@ -82,18 +85,15 @@ public class ChatRoomService {
                 lastChat != null ? lastChat.getOriginalContent() : "",
                 lastChat != null ? lastChat.getTranslatedContent() : "",
                 lastChat != null ? lastChat.getCreatedAt() : null,
-                lastChat != null ? (int) (lastChat.getId() - lastReadChatId) : 0);
+                lastChat != null ? unreadCount : 0);
     }
 
     @Transactional
-    public void updateLastReadChatMessage(String userEamil, Long chatRoomId) {
+    public void updateLastReadChatMessage(String userEmail, Long chatRoomId) {
         ChatRoom chatRoom = findById(chatRoomId);
-        User currentUser = userService.getUserByEmail(userEamil);
+        User currentUser = userService.getUserByEmail(userEmail);
         User recipient = chatRoom.getRecipient(currentUser.getId());
 
-        Optional<Chat> lastRecipientChat = chatJpaRepository.findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(
-                recipient.getId(),
-                chatRoomId);
-        lastRecipientChat.ifPresent(chat -> chatRoom.exit(currentUser.getId(), chat.getId()));
+        chatRoom.exit(currentUser.getId());
     }
 }

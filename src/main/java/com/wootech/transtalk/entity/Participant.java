@@ -2,6 +2,7 @@ package com.wootech.transtalk.entity;
 
 
 import jakarta.persistence.*;
+import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,11 +21,12 @@ public class Participant extends TimeStamped {
     @JoinColumn(name = "user_id")
     private User user;
     @Column
-    private Long lastReadChatId = 0L;
+    private Instant lastReadTime;
 
     public Participant(User user, ChatRoom chatRoom) {
         this.user = user;
         joinChatRoom(chatRoom);
+        lastReadTime = Instant.now();
     }
 
     private void joinChatRoom(ChatRoom chatRoom) {
@@ -32,11 +34,16 @@ public class Participant extends TimeStamped {
         chatRoom.addParticipant(this);
     }
 
-    public void markAsExited(Long lastReadChatId) {
-        if (this.lastReadChatId >= lastReadChatId) {
+    public void markAsExited() {
+        Instant now = Instant.now();
+        validateLastReadTime(now);
+        this.lastReadTime = now;
+    }
+
+    private void validateLastReadTime(Instant now) {
+        if (this.lastReadTime.isAfter(now)) {
             throw new RuntimeException("");
         }
-        this.lastReadChatId = lastReadChatId;
     }
 
 }

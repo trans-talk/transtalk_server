@@ -1,7 +1,6 @@
 package com.wootech.transtalk.service.user;
 
 import com.wootech.transtalk.dto.auth.AuthUser;
-import com.wootech.transtalk.entity.Chat;
 import com.wootech.transtalk.entity.ChatRoom;
 import com.wootech.transtalk.entity.Participant;
 import com.wootech.transtalk.entity.User;
@@ -12,7 +11,6 @@ import com.wootech.transtalk.repository.ParticipantRepository;
 import com.wootech.transtalk.repository.chat.ChatJpaRepository;
 import com.wootech.transtalk.repository.user.UserRepository;
 import com.wootech.transtalk.service.auth.RefreshTokenService;
-import com.wootech.transtalk.service.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
