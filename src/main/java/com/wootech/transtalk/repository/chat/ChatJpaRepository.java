@@ -14,4 +14,5 @@ public interface ChatJpaRepository extends JpaRepository<Chat, Long> {
     Optional<Chat> findTopBySenderIdAndChatRoomIdOrderByCreatedAtDesc(Long senderId, Long chatRoomId);
 
     Page<Chat> findByChatRoomIdOrderByCreatedAtDesc(Long chatRoomId, Pageable pageable);
+    void deleteByChatRoomId(Long chatRoomId);
 }

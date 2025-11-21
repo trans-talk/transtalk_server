@@ -22,4 +22,16 @@ public abstract class TimeStamped {
     @Column
     @Temporal(TemporalType.TIMESTAMP)
     private Instant modifiedAt;
+
+    @Column(nullable = true)
+    private Instant deletedAt;
+
+    public void softDelete() {
+        this.deletedAt = Instant.now();
+    }
+
+    // 삭제 여부 확인
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
 }
