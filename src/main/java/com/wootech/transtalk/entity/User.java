@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+@EqualsAndHashCode(of = "id", callSuper = false)
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

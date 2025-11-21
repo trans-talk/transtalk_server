@@ -1,5 +1,6 @@
 package com.wootech.transtalk.entity;
 
+import com.fasterxml.jackson.core.JsonToken;
 import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.exception.custom.NotFoundException;
 import jakarta.persistence.*;

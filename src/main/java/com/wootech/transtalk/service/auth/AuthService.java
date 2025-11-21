@@ -6,9 +6,12 @@ import com.wootech.transtalk.dto.auth.AuthSignInResponse;
 import com.wootech.transtalk.dto.auth.GoogleProfileResponse;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.UserRole;
+import com.wootech.transtalk.exception.custom.NotFoundException;
+import com.wootech.transtalk.repository.user.UserRepository;
 import com.wootech.transtalk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -22,6 +25,7 @@ public class AuthService {
     private final GoogleClient googleClient;
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     public URI createRequest() {
         return googleClient.buildAuthorizeApiUri();
@@ -46,7 +50,7 @@ public class AuthService {
         String accessToken = jwtUtil.createAccessToken(user.getId(), user.getEmail(), user.getName(), user.getUserRole());
         String refreshToken = jwtUtil.createRefreshToken(String.valueOf(user.getId()));
 
-        refreshTokenService.saveRefreshToken(refreshToken);
+        refreshTokenService.saveRefreshToken(user.getId(), refreshToken);
 
         return AuthSignInResponse.builder()
                 .userResponse(AuthSignInResponse.UserResponse.builder()
@@ -63,19 +67,33 @@ public class AuthService {
     }
 
 
-    // refresh token 재발급
+    // 재발급
     public AuthSignInResponse.TokenResponse refreshAccessToken(String refreshToken) {
-        String storedToken = refreshTokenService.getRefreshToken(refreshToken);
 
-        jwtUtil.validateToken(storedToken);
+        jwtUtil.validateToken(refreshToken);
 
         Long userId = Long.parseLong(jwtUtil.extractUserId(refreshToken));
-        User foundUser = userService.getUserById(userId);
+        log.info("[AuthService] Refresh Token Reissue Requested With User ID={}", userId);
 
-        String accessToken = jwtUtil.createAccessToken(foundUser.getId(), foundUser.getEmail(), foundUser.getName(), foundUser.getUserRole());
+        String storedToken = refreshTokenService.getRefreshToken(userId, refreshToken);
+
+        if (storedToken == null || !storedToken.equals(refreshToken)) {
+            log.warn("[UserService] Invalid Refresh Token={}", refreshToken);
+            throw new IllegalArgumentException("Invalid Refresh Token");
+        }
+
+        // 소프트 딜리트된 user -> Optional.empty() or exception
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.warn("[UserService]Refresh Token Reissue Failed: User Doesn't Exists With ID={}", userId);
+                    return new NotFoundException("User Not Found", HttpStatusCode.valueOf(404));
+                });
+
+        String newAccessToken = jwtUtil.createAccessToken(foundUser.getId(), foundUser.getEmail(), foundUser.getName(), foundUser.getUserRole());
+        log.info("Access Token 재발급 성공: 사용자 ID = {}", userId);
 
         return AuthSignInResponse.TokenResponse.builder()
-                .accessToken(accessToken)
+                .accessToken(newAccessToken)
                 .refreshToken(storedToken)
                 .build();
     }
