@@ -9,6 +9,7 @@ import com.wootech.transtalk.service.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 
 import static com.wootech.transtalk.config.util.CookieUtil.addRefreshTokenCookie;
+import static com.wootech.transtalk.exception.ErrorMessages.ACCESS_TOKEN_DOES_NOT_EXISTS_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -69,12 +71,23 @@ public class AuthController {
 
     // 회원탈퇴
     @DeleteMapping("/withdraw")
-    public ApiResponse<Object> withdrawUser(@AuthenticationPrincipal AuthUser authUser) {
-        userService.withdrawUser(authUser);
-        return ApiResponse.builder()
-                .success(true)
-                .message("회원탈퇴에 성공했습니다.")
-                .timestamp(LocalDateTime.now())
-                .build();
+    public ApiResponse<Object> withdrawUser(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        String accessToken = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            accessToken = authorizationHeader.substring("Bearer ".length()).trim();
+        }
+        if (accessToken != null) {
+            authService.withdrawUser(authUser, accessToken);
+            return ApiResponse.builder()
+                    .success(true)
+                    .message("회원탈퇴에 성공했습니다.")
+                    .timestamp(LocalDateTime.now())
+                    .build();
+        } else {
+            throw new IllegalArgumentException(ACCESS_TOKEN_DOES_NOT_EXISTS_ERROR);
+        }
     }
 }

@@ -27,6 +27,7 @@ public final class ErrorMessages {
 
     public static final String UNAUTHORIZED_ERROR = "인증이 필요합니다.";
     public static final String FORBIDDEN_ERROR = "접근 권한이 없습니다.";
+    public static final String WITHDRAWN_USER_ERROR = "탈퇴한 사용자입니다.";
 
     // google
     public static final String ACCESS_TOKEN_DOES_NOT_EXISTS_ERROR = "Access Token값이 존재하지 않습니다.";
