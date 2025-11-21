@@ -3,24 +3,28 @@ package com.wootech.transtalk.controller.auth;
 import com.wootech.transtalk.config.jwt.RefreshToken;
 import com.wootech.transtalk.dto.ApiResponse;
 import com.wootech.transtalk.dto.auth.AuthSignInResponse;
+import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.service.auth.AuthService;
+import com.wootech.transtalk.service.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 
 import static com.wootech.transtalk.config.util.CookieUtil.addRefreshTokenCookie;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
     // 인가 코드 받기
     @GetMapping
@@ -50,5 +54,27 @@ public class AuthController {
         addRefreshTokenCookie(httpServletResponse, tokenResponse.getRefreshToken());
         tokenResponse.removeRefreshToken();
         return ApiResponse.success(tokenResponse, "토큰 재발급에 성공했습니다.");
+    }
+
+    // 로그아웃
+    // spring security가 먼저 처리해 응답이 안보일 수 있음
+    @PostMapping("/logout")
+    public ApiResponse<Object> logOut() {
+        return ApiResponse.builder()
+                .success(true)
+                .message("로그아웃에 성공했습니다.")
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    // 회원탈퇴
+    @DeleteMapping("/withdraw")
+    public ApiResponse<Object> withdrawUser(@AuthenticationPrincipal AuthUser authUser) {
+        userService.withdrawUser(authUser);
+        return ApiResponse.builder()
+                .success(true)
+                .message("회원탈퇴에 성공했습니다.")
+                .timestamp(LocalDateTime.now())
+                .build();
     }
 }

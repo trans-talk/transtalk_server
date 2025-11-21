@@ -54,7 +54,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 
-tasks.named('test') {
+test {
 	useJUnitPlatform()
-}
 
+	jvmArgs += "-javaagent:${classpath.find { it.name.contains("byte-buddy-agent") }.canonicalPath}"
+}
