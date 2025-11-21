@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*; // Mockito 스태틱 임포트
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -38,7 +38,7 @@ class UserServiceTest {
     @Mock
     private ChatJpaRepository chatJpaRepository;
 
-    @InjectMocks // @Mock으로 선언된 객체들을 자동으로 주입해줍니다. 생성자가 없어도 동작해요!
+    @InjectMocks
     private UserService userService;
 
 
@@ -99,7 +99,6 @@ class UserServiceTest {
     }
 
 
-    // 추가 테스트 케이스: 유저가 참여한 채팅방이 하나도 없는 경우
     @Test
     void 사용자가_참여한_채팅방이_없을때_채팅방과_참여자_데이터는_삭제되지않는다() {
         // Given
