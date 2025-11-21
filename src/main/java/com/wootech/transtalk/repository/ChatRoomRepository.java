@@ -18,15 +18,11 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom,Long> {
             JOIN cr.participants p2
             WHERE p.user.id = :userId
             AND (:name IS NULL OR p2.user.name LIKE CONCAT('%',:name,'%'))
-            ORDER BY(
-            SELECT MAX(c.createdAt)
-            FROM Chat c
-            WHERE c.chatRoomId = cr.id
-            ) DESC 
+            ORDER BY cr.lastMessageTime DESC NULLS LAST
             """)
-    Page<ChatRoom> findByParticipantsUserId(@Param("userId") Long userId,
-                                            @Param("name") String name,
-                                            Pageable pageable);
+    Page<ChatRoom> findChatRoomsByParticipantIdAndName(@Param("userId") Long userId,
+                                                       @Param("name") String name,
+                                                       Pageable pageable);
 
     @Query("""
             SELECT cr 
