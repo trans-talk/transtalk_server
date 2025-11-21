@@ -11,6 +11,7 @@ import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,12 @@ public class ChatRoomController {
 
     @GetMapping
     public ApiResponse<ChatRoomListResponse> findChatRooms(@AuthenticationPrincipal AuthUser authUser,
-                                                           @PageableDefault(size = 20) Pageable pageable) {
-        Page<ChatRoomResponse> pages = chatRoomService.findChatRoomsByUserId(authUser.getUserId(),
+                                                           @PageableDefault(size = 20) Pageable pageable,
+                                                           @RequestParam(required = false) String name
+                                                           ) {
+        Page<ChatRoomResponse> pages = chatRoomService.findChatRoomsByUserId(
+                authUser.getUserId(),
+                name,
                 pageable);
         ChatRoomListResponse response = ChatRoomListResponse.from(pages);
         return ApiResponse.success(response);

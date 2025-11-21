@@ -45,9 +45,9 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public Page<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId, Pageable pageable) {
+    public Page<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId, String name, Pageable pageable) {
         User currentUser = userService.getUserById(currentUserId);
-        Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, pageable);
+        Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, name, pageable);
 
         return chatRooms.map(chatRoom -> convertToChatRoomResponse(currentUserId, chatRoom));
     }
