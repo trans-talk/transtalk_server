@@ -35,7 +35,6 @@ public class UserService {
     private final ChatRoomRepository chatRoomRepository;
     private final RefreshTokenService refreshTokenService;
     private final ChatJpaRepository chatJpaRepository;
-    private final ChatRepositoryMongoAdapter chatRepositoryMongoAdapter;
 
     // 사용자 프로필 조회
     public AuthSignInResponse.UserResponse getProfileById(AuthUser authUser) {
@@ -96,16 +95,16 @@ public class UserService {
         // Participant 삭제
         List<Participant> participantsToDelete = participantRepository.findByUser(user);
         // 변경될 수 있는 채팅방
-        Set<ChatRoom> ChatRooms = new HashSet<>();
+        Set<ChatRoom> chatRooms = new HashSet<>();
 
         for (Participant participant : participantsToDelete) {
             participantRepository.deleteById(participant.getId());
-            ChatRooms.add(participant.getChatRoom());
+            chatRooms.add(participant.getChatRoom());
         }
         log.info("[UserService] All Participants({}) Soft Deleted: By User ID={}", participantsToDelete.size(), userId);
 
         // 채팅방 삭제
-        for (ChatRoom chatRoom : ChatRooms) {
+        for (ChatRoom chatRoom : chatRooms) {
             // 제거되지 않고 남은 participant 가져오기
             List<Participant> remainingActiveParticipants = participantRepository.findByChatRoom(chatRoom);
 

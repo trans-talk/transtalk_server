@@ -9,8 +9,6 @@ import com.wootech.transtalk.service.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,7 +67,7 @@ public class AuthController {
                 .build();
     }
 
-    //회원탈퇴
+    // 회원탈퇴
     @DeleteMapping("/withdraw")
     public ApiResponse<Object> withdrawUser(@AuthenticationPrincipal AuthUser authUser) {
         userService.withdrawUser(authUser);
