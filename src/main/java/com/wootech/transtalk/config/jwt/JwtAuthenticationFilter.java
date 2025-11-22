@@ -1,9 +1,12 @@
 package com.wootech.transtalk.config.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wootech.transtalk.config.util.JwtUtil;
+import com.wootech.transtalk.dto.ApiResponse;
 import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.enums.UserRole;
 import com.wootech.transtalk.exception.custom.NotFoundException;
+import com.wootech.transtalk.service.auth.BlackListService;
 import com.wootech.transtalk.service.user.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -16,13 +19,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.wootech.transtalk.exception.ErrorMessages.*;
 
@@ -33,6 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final BlackListService blackListService;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(
@@ -44,6 +53,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String jwt = jwtUtil.substringToken(authorizationHeader);
+
+            String jti = jwtUtil.extractJti(jwt);
+            if (jti != null && blackListService.contains(jti)) {
+                // 블랙리스트에 있으면 즉시 인증 실패 처리
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                ApiResponse<Void> body = ApiResponse.error(LOGGED_OUT_USER_ERROR, HttpStatus.UNAUTHORIZED.name());
+                response.getWriter().write(objectMapper.writeValueAsString(body));
+                return;
+            }
 
             try {
                 Claims claims = jwtUtil.extractClaims(jwt);

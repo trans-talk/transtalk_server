@@ -51,15 +51,16 @@ public class GoogleClient {
                 .queryParam("response_type", "code")
                 .queryParam("scope", "email profile")
                 .queryParam("access_type", "offline")
+                .queryParam("prompt", "select_account")
                 .build()
                 .toUri();
     }
 
     public String requestToken(String code) {
-         URI uri = UriComponentsBuilder.fromUriString(this.tokenUri)
-                 .build()
-                 .toUri();
-         log.info("[GoogleClient] API URI: {}", uri);
+        URI uri = UriComponentsBuilder.fromUriString(this.tokenUri)
+                .build()
+                .toUri();
+        log.info("[GoogleClient] API URI: {}", uri);
 
         GoogleApiRequest tokenRequest = GoogleApiRequest.builder()
                 .code(code)
@@ -69,26 +70,25 @@ public class GoogleClient {
                 .grantType("authorization_code")
                 .build();
 
-         GoogleApiResponse tokenResponse = restClient.post()
-                 .uri(uri)
-                 .header(HttpHeaders.ACCEPT)
-                 .acceptCharset(StandardCharsets.UTF_8)
-                 .contentType(MediaType.APPLICATION_JSON)
-                 .body(tokenRequest)
-                 .retrieve()
-                 .onStatus(HttpStatusCode::isError, ((request, response) -> {
-                     String body = new String(response.getBody().readAllBytes());
-                     log.error("[GoogleAPI] Raw Response: {}", body);
+        GoogleApiResponse tokenResponse = restClient.post()
+                .uri(uri)
+                .header(HttpHeaders.ACCEPT)
+                .acceptCharset(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(tokenRequest)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, ((request, response) -> {
+                    String body = new String(response.getBody().readAllBytes());
+                    log.error("[GoogleAPI] Raw Response: {}", body);
 
-                     throw new GoogleApiException("Token Request Failed: " + body, response.getStatusCode());
-                 }))
-                 .body(GoogleApiResponse.class);
+                    throw new GoogleApiException("Token Request Failed: " + body, response.getStatusCode());
+                }))
+                .body(GoogleApiResponse.class);
 
-         // TODO: external api logging
-         log.info("[GoogleAPI] Token Response: {}", tokenResponse);
+        log.info("[GoogleAPI] Token Response: {}", tokenResponse);
 
-         String accessToken = extractAccessCode(tokenResponse);
-         return accessToken;
+        String accessToken = extractAccessCode(tokenResponse);
+        return accessToken;
     }
 
     private String extractAccessCode(GoogleApiResponse response) {
@@ -107,7 +107,7 @@ public class GoogleClient {
 
         GoogleProfileResponse googleProfileResponse = restClient.get()
                 .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX  + accessToken)
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, ((request, response) -> {
                     String body = new String(response.getBody().readAllBytes());

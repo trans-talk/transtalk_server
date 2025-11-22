@@ -1,8 +1,8 @@
 package com.wootech.transtalk.config.util;
 
 import com.wootech.transtalk.enums.UserRole;
-import com.wootech.transtalk.exception.custom.UnauthorizedException;
 import com.wootech.transtalk.exception.custom.ExpiredJwtException;
+import com.wootech.transtalk.exception.custom.UnauthorizedException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -42,6 +42,7 @@ public class JwtUtil {
 
     public String createAccessToken(Long userId, String email, String name, UserRole userRole) {
         Date date = new Date();
+        String jti = UUID.randomUUID().toString();
 
         return BEARER_PREFIX +
                 Jwts.builder()
@@ -50,6 +51,7 @@ public class JwtUtil {
                         .claim("name", name)
                         .claim("userRole", userRole)
                         .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_TIME))
+                        .id(jti)
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
                         .compact();
@@ -111,22 +113,6 @@ public class JwtUtil {
         return extractClaims(token).get("email", String.class);
     }
 
-    // refresh token 유효성 검증
-    public boolean validateRefreshToken(String token) {
-        try {
-            Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parseSignedClaims(token);
-            return true;
-        } catch (ExpiredJwtException e) {
-            log.error(EXPIRED_REFRESH_TOKEN_ERROR + ": {}", e.getMessage());
-            throw new ExpiredJwtException(EXPIRED_REFRESH_TOKEN_ERROR, HttpStatus.valueOf(406));
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     // refresh token 에서 userId 값 추출
     public String extractUserId(String refreshToken) {
         Claims claims = Jwts.parser()
@@ -136,5 +122,13 @@ public class JwtUtil {
                 .getPayload();
 
         return claims.get("userId", String.class);
+    }
+
+    public String extractJti(String token) {
+        return extractClaims(token).getId();
+    }
+
+    public Date extractExpiration(String token) {
+        return extractClaims(token).getExpiration();
     }
 }
