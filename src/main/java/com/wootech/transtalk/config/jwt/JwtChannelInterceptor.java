@@ -2,9 +2,11 @@ package com.wootech.transtalk.config.jwt;
 
 import com.wootech.transtalk.config.util.JwtUtil;
 import com.wootech.transtalk.enums.UserRole;
+import com.wootech.transtalk.exception.custom.NotFoundException;
 import com.wootech.transtalk.exception.custom.UnauthorizedException;
 import com.wootech.transtalk.event.Events;
 import com.wootech.transtalk.event.ExitToChatRoomEvent;
+import com.wootech.transtalk.service.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static com.wootech.transtalk.exception.ErrorMessages.JWT_DOES_NOT_EXIST_ERROR;
+import static com.wootech.transtalk.exception.ErrorMessages.WITHDRAWN_USER_ERROR;
 
 @Slf4j
 @Component
@@ -27,6 +30,7 @@ import static com.wootech.transtalk.exception.ErrorMessages.JWT_DOES_NOT_EXIST_E
 public class JwtChannelInterceptor implements ChannelInterceptor {
 
     private final JwtUtil jwtUtil;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -53,8 +57,14 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         validateAccessToken(accessToken);
 
         String userEmail = jwtUtil.getEmail(accessToken);
+        // 탈퇴된 사용자라면 404 에러
+        try {
+            userDetailsService.loadUserByUsername(userEmail);
+        } catch (NotFoundException e) {
+            log.error(WITHDRAWN_USER_ERROR);
+            throw new NotFoundException(WITHDRAWN_USER_ERROR, HttpStatusCode.valueOf(404));
+        }
         accessor.setUser(new UsernamePasswordAuthenticationToken(userEmail, null, List.of(UserRole.ROLE_USER)));
-
         log.info("[JwtChannelInterceptor] CONNECT - JWT Token validated for user={}", userEmail);
     }
     private String extractAccessToken(StompHeaderAccessor accessor) {

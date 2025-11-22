@@ -20,6 +20,7 @@ spring:
             authorize: ${GOOGLE_AUTHORIZE_URI}
             token: ${GOOGLE_TOKEN_URI}
             profile: ${GOOGLE_PROFILE_URI}
+            revoke: ${GOOGLE_REVOKE_URI}
 
   data:
     redis:

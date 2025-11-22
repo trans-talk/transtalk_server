@@ -6,12 +6,13 @@ import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
 
 @Getter
-public class AuthUser {
+public class AuthUser implements UserDetails {
 
     private final Long userId;
     private final String email;
@@ -24,5 +25,15 @@ public class AuthUser {
         this.email = email;
         this.name = name;
         this.authorities = List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 }

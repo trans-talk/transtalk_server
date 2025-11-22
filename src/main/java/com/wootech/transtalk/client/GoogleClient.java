@@ -38,6 +38,9 @@ public class GoogleClient {
     private String redirectUri;
     @Value("${GOOGLE_AUTHORIZE_URI}")
     private String authorizeUri;
+    @Value("${spring.oauth.google.client.uri.revoke}")
+    private String revokeUri;
+
 
     public static final String BEARER_PREFIX = "Bearer ";
 
@@ -118,5 +121,33 @@ public class GoogleClient {
         return googleProfileResponse;
     }
 
+    // 회원탈퇴
+    public void revokeToken(String token) {
+        if (token == null || token.isEmpty()) {
+            log.warn("[GoogleClient] Revoke token is empty, skipping revocation.");
+            return;
+        }
+
+        URI uri = UriComponentsBuilder.fromUriString(this.revokeUri)
+                .queryParam("token", token)
+                .build()
+                .toUri();
+        log.info("[GoogleClient] Revoke API URI: {}", uri);
+
+        try {
+            restClient.post()
+                    .uri(uri)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        String body = new String(response.getBody().readAllBytes());
+                        log.error("[GoogleClient] Revoke Token Failed for token: [{}]. Response: {}", token, body);
+                    })
+                    .toBodilessEntity();
+            log.info("[GoogleClient] Successfully Revoked Token for User Token: [{}]", token);
+        } catch (Exception e) {
+            log.error("[GoogleClient] Exception During Token Revocation for Token: [{}]. Error: {}", token, e.getMessage(), e);
+        }
+    }
 
 }

@@ -1,20 +1,23 @@
 package com.wootech.transtalk.entity;
 
-import com.fasterxml.jackson.core.JsonToken;
 import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.exception.custom.NotFoundException;
 import jakarta.persistence.*;
-import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.http.HttpStatusCode;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.wootech.transtalk.exception.ErrorMessages.PARTICIPANT_NOT_FOUND_ERROR;
 
+@SQLDelete(sql = "UPDATE chat_room SET deleted_at = NOW() WHERE chat_room_id = ?")
+@Where(clause = "deleted_at IS NULL")
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

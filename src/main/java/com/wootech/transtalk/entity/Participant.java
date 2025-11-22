@@ -6,7 +6,11 @@ import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
+@SQLDelete(sql = "UPDATE participant SET deleted_at = NOW() WHERE participant_id = ?")
+@Where(clause = "deleted_at IS NULL")
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

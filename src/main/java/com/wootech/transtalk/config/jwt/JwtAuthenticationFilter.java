@@ -3,6 +3,8 @@ package com.wootech.transtalk.config.jwt;
 import com.wootech.transtalk.config.util.JwtUtil;
 import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.enums.UserRole;
+import com.wootech.transtalk.exception.custom.NotFoundException;
+import com.wootech.transtalk.service.user.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -14,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -29,6 +32,7 @@ import static com.wootech.transtalk.exception.ErrorMessages.*;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -43,11 +47,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             try {
                 Claims claims = jwtUtil.extractClaims(jwt);
+                String email = jwtUtil.getEmail(jwt);
+
+                // 탈퇴된 사용자라면 404 에러
+                userDetailsService.loadUserByUsername(email);
 
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {
                     setAuthentication(claims);
                 }
 
+            }catch (NotFoundException e) {
+                log.error(WITHDRAWN_USER_ERROR);
+                throw new AuthenticationCredentialsNotFoundException(WITHDRAWN_USER_ERROR, e);
             } catch (SecurityException | MalformedJwtException e) {
                 log.error(INVALID_JWT_SIGNATURE_ERROR, e);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, INVALID_JWT_SIGNATURE_ERROR);
