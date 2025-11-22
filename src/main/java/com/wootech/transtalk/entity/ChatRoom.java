@@ -43,10 +43,19 @@ public class ChatRoom extends TimeStamped {
     }
 
     public User getRecipient(Long currentUserId) {
-        return participants.stream().filter(participant -> !participant.getUser().getId().equals(currentUserId))
-                .map(Participant::getUser).findFirst()
-                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
+        return participants.stream()
+                .filter(participant -> participant != null && participant.getUser() != null)
+                .filter(participant -> !participant.getUser().getId().equals(currentUserId))
+                .map(Participant::getUser)
+                .findFirst()
+                .orElseThrow(() ->
+                        new NotFoundException(
+                                PARTICIPANT_NOT_FOUND_ERROR,
+                                HttpStatusCode.valueOf(404)
+                        )
+                );
     }
+
 
     public Instant getMyLastReadTime(Long currentUserId) {
         return participants.stream().filter(participant -> participant.getUser().getId().equals(currentUserId))
