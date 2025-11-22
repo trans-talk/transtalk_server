@@ -15,11 +15,14 @@ import com.wootech.transtalk.service.chat.ChatParticipantService;
 import com.wootech.transtalk.service.participant.ParticipantService;
 import com.wootech.transtalk.service.user.UserService;
 import java.time.Instant;
+
 import java.util.List;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -51,7 +54,7 @@ public class ChatRoomService {
     @Transactional
     public Page<ChatRoomResponse> findChatRoomsByUserId(Long currentUserId, String name, Pageable pageable) {
         User currentUser = userService.getUserById(currentUserId);
-        Page<ChatRoom> chatRooms = chatRoomRepository.findByParticipantsUserId(currentUserId, name, pageable);
+        Page<ChatRoom> chatRooms = chatRoomRepository.findChatRoomsByParticipantIdAndName(currentUserId, name, pageable);
 
         return chatRooms.map(chatRoom -> convertToChatRoomResponse(currentUserId, chatRoom));
     }
@@ -76,7 +79,8 @@ public class ChatRoomService {
     public ChatRoomResponse convertToChatRoomResponse(Long recipientId, ChatRoom chatRoom) {
         User recipient = chatRoom.getRecipient(recipientId);
         //채팅방의 가장 마지막 메세지
-        ChatMessage lastChat = chatParticipantService.findLastChatByChatRoomId(chatRoom.getId()).orElse(null);
+        Optional<ChatMessage> lastChat = chatParticipantService.findLastChatByChatRoomId(chatRoom.getId());
+        lastChat.ifPresent(chatMessage -> chatRoom.newMessageArrived(chatMessage.getCreatedAt()));
         //마지막 읽은 메세지 부터 - 현재 저장된 메세지 개수를 구하는 메서드
         Instant myLastReadTime = chatRoom.getMyLastReadTime(recipientId);
         int unreadCount = chatParticipantService.getUnreadCount(chatRoom.getId(), myLastReadTime);
@@ -86,10 +90,10 @@ public class ChatRoomService {
                 recipient.getPicture(),
                 recipient.getName(),
                 chatRoom.getLanguage().getCode(),
-                lastChat != null ? lastChat.getOriginalContent() : "",
-                lastChat != null ? lastChat.getTranslatedContent() : "",
-                lastChat != null ? lastChat.getCreatedAt() : null,
-                lastChat != null ? unreadCount : 0);
+                lastChat.map(ChatMessage::getOriginalContent).orElse(""),
+                lastChat.map(ChatMessage::getTranslatedContent).orElse(""),
+                lastChat.map(ChatMessage::getCreatedAt).orElse(null),
+                lastChat.isPresent() ? unreadCount : 0);
     }
 
     @Transactional
