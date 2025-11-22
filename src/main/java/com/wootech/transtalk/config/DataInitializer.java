@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.List;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class DataInitializer {
     private final UserRepository userRepository;
