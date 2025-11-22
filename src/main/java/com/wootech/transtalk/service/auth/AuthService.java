@@ -3,18 +3,24 @@ package com.wootech.transtalk.service.auth;
 import com.wootech.transtalk.client.GoogleClient;
 import com.wootech.transtalk.config.util.JwtUtil;
 import com.wootech.transtalk.dto.auth.AuthSignInResponse;
+import com.wootech.transtalk.dto.auth.AuthUser;
 import com.wootech.transtalk.dto.auth.GoogleProfileResponse;
 import com.wootech.transtalk.entity.User;
 import com.wootech.transtalk.enums.UserRole;
+import com.wootech.transtalk.event.user.UserWithdrawnEvent;
 import com.wootech.transtalk.exception.custom.NotFoundException;
 import com.wootech.transtalk.repository.user.UserRepository;
 import com.wootech.transtalk.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
+
+import static com.wootech.transtalk.exception.ErrorMessages.USER_NOT_FOUND_ERROR;
 
 @Slf4j
 @Service
@@ -26,6 +32,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher publisher;
 
     public URI createRequest() {
         return googleClient.buildAuthorizeApiUri();
@@ -96,5 +103,29 @@ public class AuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(storedToken)
                 .build();
+    }
+
+    // 회원탈퇴
+    @Transactional
+    public void withdrawUser(AuthUser authUser, String accessToken) {
+        Long userId = authUser.getUserId();
+        log.info("[UserService] Received User ID={}", userId);
+
+        // 제거되지 않은 사용자만 조회
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_ERROR, HttpStatusCode.valueOf(404)));
+
+        refreshTokenService.deleteAllTokensByUserId(userId);
+        log.info("[AuthService] Deleted Refresh Tokens In Redis With User ID={}", userId);
+
+        userRepository.deleteById(userId);
+        log.info("[AuthService] Softly Deleted User ID={}", userId);
+
+        googleClient.revokeToken(accessToken);
+
+        publisher.publishEvent(new UserWithdrawnEvent(userId));
+        log.info("[AuthService] UserWithdrawnEvent Published: User ID={}", userId);
+
+        log.info("[AuthService] User Withdrawal Completed: User ID={}", userId);
     }
 }

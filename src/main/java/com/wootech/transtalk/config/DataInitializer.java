@@ -10,10 +10,11 @@ import com.wootech.transtalk.repository.chat.ChatRepository;
 import com.wootech.transtalk.repository.user.UserRepository;
 import com.wootech.transtalk.service.chatroom.ChatRoomService;
 import jakarta.annotation.PostConstruct;
-import java.time.Instant;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor

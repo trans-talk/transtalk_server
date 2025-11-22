@@ -12,9 +12,13 @@ import com.wootech.transtalk.enums.TranslateLanguage;
 import com.wootech.transtalk.exception.custom.NotFoundException;
 import com.wootech.transtalk.repository.ChatRoomRepository;
 import com.wootech.transtalk.service.chat.ChatParticipantService;
+import com.wootech.transtalk.service.participant.ParticipantService;
 import com.wootech.transtalk.service.user.UserService;
 import java.time.Instant;
+
+import java.util.List;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,6 +35,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserService userService;
     private final ChatParticipantService chatParticipantService;
+    private final ParticipantService participantService;
 
     @Transactional
     public CreateChatRoomResponse save(TranslateLanguage language, String senderEmail, String recipientEmail) {
@@ -98,5 +103,27 @@ public class ChatRoomService {
         User recipient = chatRoom.getRecipient(currentUser.getId());
 
         chatRoom.exit(currentUser.getId());
+    }
+
+    @Transactional
+    public boolean cleanupRoom(Long chatRoomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElse(null); // 이미 삭제됨 -> null 값
+
+        if (chatRoom == null || chatRoom.isDeleted()) {
+            log.info("[ChatRoomService] Already Deleted Or Doesn't Exist With Chat Room ID={}", chatRoomId);
+            return false;
+        }
+
+        // 해당 채팅방에 제거되지 않은 참여자 조회
+        List<Participant> remainingParticipants =  participantService.findParticipantsByChatRoom(chatRoomId);
+
+        // 모든 참여자가 되었을 경우 삭제
+        if (remainingParticipants.isEmpty()) {
+            chatRoomRepository.deleteById(chatRoom.getId());
+            log.info("[ChatRoomService] All Of Participants Were Deleted In Chat Room ID={}", chatRoomId);
+            return true;
+        }
+        return false;
     }
 }
