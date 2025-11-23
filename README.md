@@ -70,7 +70,7 @@ transtalk-server/
 
 For more detailed API information, please refer to the Notion document below:
 
-[**Transtalk API Documentation**](https://www.notion.so/2b2564b59b0580b29d89dad32e889f0a?pvs=21)
+[**Transtalk API Documentation**](api.md)
 
 <br>
 
@@ -78,8 +78,22 @@ For more detailed API information, please refer to the Notion document below:
 
 The relationships between database tables can be viewed through the ERD below:
 
-<img width="800" height="400" alt="Image" src="https://github.com/user-attachments/assets/cbfe95ee-8ec5-41f7-a1a5-2aabe6e933a3" />
+<img width="800" height="400" alt="Image" src="https://github.com/user-attachments/assets/f549150a-ce2f-47d5-a2b1-64f803d6d1fe" />
 
+### Redis Key Design
+
+This section defines the key patterns and purposes for data stored in Redis.
+
+| Key Type          | Key Pattern                                         | Description                                                                 | Value Type | Expiration Policy                   |
+|---|---|---|---|---|
+| Refresh Token     | `refresh:{userId}:{refreshTokenValue}`<br>(e.g., `refresh:user123:abcDEfGHIjkl...`) | Stores valid Refresh Tokens for Access Token re-issuance.                     | String     | Matches Refresh Token's validity (e.g., 2 weeks) |
+| JWT Blacklist (JTI) | `bl:jti:{jtiValue}`<br>(e.g., `bl:jti:a1b2c3d4e5f6...`) | Stores JTI of invalidated Access Tokens to prevent reuse after logout or compromise. | String     | Matches Access Token's validity (e.g., 30 mins)  |
+
+**Notes:**
+
+*   **`{userId}`**: Actual user ID.
+*   **`{refreshTokenValue}`**: The Refresh Token string.
+*   **`{jtiValue}`**: The `jti` (JWT ID) claim value from the JWT.
 
 <br>
 
@@ -118,8 +132,7 @@ The relationships between database tables can be viewed through the ERD below:
 
 The main responsibilities for the Transtalk-Server project are as follows:
 
-| **Name** | **Key Responsibilities** |
-| --- | --- |
+| Name        | Key Responsibilities                                                                                                                                                                                                                                                                           |
+|---|---|
 | TaeSeon Yoo | - **Chatroom & Participant Domains**: Designed and implemented core structures.<br>- **WebSockets**: Set up real-time communication.<br>- **Chat Messaging**: Implemented sending and storage using JPA.<br>- **Refactoring & Migration**: Led chat message refactoring and migrated from JPA to MongoDB.<br>- **Translation Integration**: Integrated external translation services using DeepL API.<br>- **CI/CD**: Automated deployment workflows with GitHub Actions. |
-| HoSoo Lee | - **Authentication & Authorization**: Implemented and applied to WebSockets.<br>- **Chat Messaging**: Implemented sending and storage using MongoDB.<br>- **Deployment**: Led application deployment. |
-
+| HoSoo Lee   | - **Authentication & Authorization**: Implemented comprehensive authentication and authorization using Spring Security, JWT, Google Social Login, Redis blacklist, and Refresh Token mechanisms.<br>- **WebSocket Integration**: Configured JWT and Spring Security settings for secure real-time communication via WebSockets.<br>- **Chat Messaging (MongoDB)**: Implemented chat message sending, storage, and retrieval by configuring MongoDB.<br>- **Cloud Deployment**: Led application deployment utilizing AWS EC2, RDS, and MongoDB Cloud services. |
