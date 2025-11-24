@@ -78,7 +78,7 @@ For more detailed API information, please refer to the Notion document below:
 
 The relationships between database tables can be viewed through the ERD below:
 
-<img width="800" height="400" alt="Image" src="https://github.com/user-attachments/assets/f549150a-ce2f-47d5-a2b1-64f803d6d1fe" />
+<img width="800" height="578" alt="Image" src="https://github.com/user-attachments/assets/8a9196a4-5766-4464-aa74-c270aacea7f8" />
 
 ### Redis Key Design
 
